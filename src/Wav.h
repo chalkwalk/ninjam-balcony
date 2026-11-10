@@ -5,6 +5,9 @@
 #include <string>
 
 // A 32-bit float stereo WAV, written as it goes: for renders and fixtures.
+// A WAV's sizes are 32-bit, so it holds at most about 3 hours here (48 kHz);
+// past that, and on any failed write (a full disk), it stops writing and
+// `failed()` says why. The caller decides what to do; it is never silent.
 namespace balcony {
 
 class WavWriter {
@@ -16,15 +19,24 @@ public:
   }
   ~WavWriter() { close(); }
   bool ok() const { return f_ != nullptr; }
+  // Empty while every write has succeeded.
+  const std::string &failed() const { return failed_; }
 
   void write(const float *l, const float *r, int n) {
-    if (f_ == nullptr)
+    if (f_ == nullptr || !failed_.empty())
       return;
-    for (int i = 0; i < n; ++i) {
-      std::fwrite(&l[i], 4, 1, f_);
-      std::fwrite(&r[i], 4, 1, f_);
+    if ((uint64_t)frames_ + (uint64_t)n > kMaxFrames) {
+      failed_ = "longer than a WAV can hold; stopped writing";
+      return;
     }
-    frames_ += (uint32_t)n;
+    for (int i = 0; i < n; ++i) {
+      const float frame[2] = {l[i], r[i]};
+      if (std::fwrite(frame, 4, 2, f_) != 2) {
+        failed_ = "write failed (disk full?)";
+        return;
+      }
+      ++frames_;
+    }
   }
 
   void close() {
@@ -32,7 +44,8 @@ public:
       return;
     std::fseek(f_, 0, SEEK_SET);
     header(frames_);
-    std::fclose(f_);
+    if (std::fclose(f_) != 0 && failed_.empty())
+      failed_ = "write failed on close (disk full?)";
     f_ = nullptr;
   }
 
@@ -55,7 +68,10 @@ private:
     u32(data);
   }
 
+  // 36 header bytes plus 8 per frame must fit the RIFF size.
+  static constexpr uint64_t kMaxFrames = (0xFFFFFFFFull - 36) / 8;
   std::FILE *f_ = nullptr;
+  std::string failed_;
   int rate_;
   uint32_t frames_ = 0;
 };

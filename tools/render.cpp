@@ -114,6 +114,9 @@ int main(int argc, char **argv) {
       break;
   }
   wav.close();
+  // The measurements below hold either way: they are taken before writing.
+  if (!wav.failed().empty())
+    std::fprintf(stderr, "%s: %s\n", argv[2], wav.failed().c_str());
 
   std::printf("intervals %d, %.1f min of audio; %d log lines skipped, %d clips missing\n",
               reader.intervalCount(), audioSeconds / 60.0, reader.skippedLogLines(),
@@ -131,5 +134,5 @@ int main(int argc, char **argv) {
               "(%.2f%% and %.2f%% of one core)\n",
               decodeSeconds, mixSeconds, audioSeconds,
               100.0 * decodeSeconds / audioSeconds, 100.0 * mixSeconds / audioSeconds);
-  return 0;
+  return wav.failed().empty() ? 0 : 1;
 }
