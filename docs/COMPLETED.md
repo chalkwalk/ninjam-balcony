@@ -56,3 +56,29 @@ size the bot will use.
 
 Renders, local only: `work/render-2025-04-02-A-fast.wav`, `work/render-2025-04-02-B-gentle.wav`
 (48 kHz float stereo); trace of B in `work/render-B.log`.
+
+## Built in the first autonomous stretch (2026-11-09/10)
+
+Each verified as stated; the commits carry the detail.
+
+- **DESIGN §9 settled**: libopus (system), a first-party WebSocket/HTTP server, the
+  wire format, WebCodecs on the page.
+- **Skeleton** on `chalkwalk-ninjam`, `chalkwalk-dsp` and `chalkwalk-jambot` as
+  submodules, Catch2, `BALCONY_TESTS` (ninjam forces `BUILD_TESTING` off).
+- **Offline mix** of an archived jam: archive parser (in ninjam), sliding loudness,
+  limiter and a windowed-sinc resampler (in dsp; the archive's clips are 88.2 kHz).
+- **Replay to the browser**: Opus, WebSocket, status, the closed and open page, meters
+  moving with what is heard. Checked in headless Chrome against a replayed archive.
+- **The socket client in jambot** (`SocketClient`), and volume/pan on
+  `BotClient::Channel`. Tested against a scripted server and live against a loopback
+  `ninjamsrv`. **Found:** the stock server closes a connection on any frame payload
+  over 16 KiB; audio now goes in 8 KiB frames, and ninjam's `PROTOCOL.md` says so.
+- **Live in a room**: join message (and privately to later arrivals), chat both ways,
+  batched arrivals, opt-out and back, sent away, admin kick and quiet, neutral votes.
+  Checked live with three fake players and two web listeners. **Found:** (1) jambot's
+  handles keep `@ip`, so the balcony addresses by display name; (2) the stock server
+  swallows unknown `!` commands, so admin commands are words (`DESIGN §5`); (3) the
+  cautious vote rule can block a vote when the bot is counted, hence
+  `--vote-threshold` (`DESIGN §4`); (4) a disconnect dropped the goodbye.
+- **Deploy kit** in `deploy/`: the unit (attached to `ninjam.service`, so
+  `ninjam-room` is unchanged), Caddy, the steps. Not deployed.
