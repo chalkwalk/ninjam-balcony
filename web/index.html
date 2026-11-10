@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ninjam balcony</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<!--
+  The room this page belongs to. Everything a different room would change is
+  here, so the page itself never needs editing (DESIGN §2).
+-->
+<body data-room-title="Virtual Open Electronic Improv"
+      data-schedule-weekday="3"
+      data-schedule-nth="1"
+      data-schedule-hour="18"
+      data-schedule-minutes="120"
+      data-schedule-tz="America/Los_Angeles"
+      data-ws-path="ws"
+      data-status-path="status">
+<main>
+  <header>
+    <h1 id="title">Ninjam balcony</h1>
+    <p class="tagline">Listen to the jam and talk to the band, from your browser.</p>
+  </header>
+
+  <!-- Between jams: when the next one is. -->
+  <section id="closed" aria-labelledby="closed-heading">
+    <h2 id="closed-heading">No jam right now</h2>
+    <p id="next-jam">Working out when the next one is…</p>
+    <p class="actions">
+      <a id="ics" class="button" download="jam.ics" href="#">Add to your calendar (.ics)</a>
+      <a id="gcal" class="button" target="_blank" rel="noopener" href="#">Add to Google Calendar</a>
+    </p>
+    <p class="quiet">This page switches to the jam by itself when the room opens.</p>
+  </section>
+
+  <!-- The room is open: choose a name. -->
+  <section id="join" aria-labelledby="join-heading" hidden>
+    <h2 id="join-heading">The jam is on</h2>
+    <form id="join-form">
+      <label for="name">Your name, as the band will see it</label>
+      <div class="row">
+        <input id="name" name="name" autocomplete="nickname" maxlength="24" required
+               pattern="[^@&lt;&gt;]+" aria-describedby="name-help name-error">
+        <button type="submit">Listen</button>
+      </div>
+      <p id="name-help" class="quiet">Letters, digits, spaces, <code>_ - .</code>; up to 24.</p>
+      <p id="name-error" class="error" role="alert"></p>
+    </form>
+    <p class="quiet">Players hear each other one interval late; you will too, plus a moment.
+      Anything you type reaches the band's chat, marked as from the balcony.</p>
+  </section>
+
+  <!-- Listening. -->
+  <section id="listening" aria-labelledby="listening-heading" hidden>
+    <h2 id="listening-heading" tabindex="-1">Listening</h2>
+    <p id="delay-note" class="quiet"></p>
+    <div class="controls">
+      <button id="mute" type="button" aria-pressed="false">Mute</button>
+      <label for="volume">Volume</label>
+      <input id="volume" type="range" min="0" max="100" value="80">
+      <span id="buffer" class="quiet" aria-hidden="true"></span>
+    </div>
+
+    <div class="columns">
+      <section aria-labelledby="players-heading">
+        <h3 id="players-heading">In the room</h3>
+        <ul id="players" class="players"></ul>
+        <h3 id="listeners-heading">In the balcony</h3>
+        <ul id="listeners" class="listeners" aria-labelledby="listeners-heading"></ul>
+      </section>
+
+      <section aria-labelledby="chat-heading" class="chat">
+        <h3 id="chat-heading">Chat</h3>
+        <ol id="log" class="log" role="log" aria-live="polite" aria-relevant="additions"></ol>
+        <form id="say-form" class="row">
+          <label for="say" class="visually-hidden">Say something to the band</label>
+          <input id="say" autocomplete="off" maxlength="200" placeholder="Say something to the band">
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <section id="ended" aria-labelledby="ended-heading" hidden>
+    <h2 id="ended-heading" tabindex="-1">The stream has ended</h2>
+    <p id="ended-why"></p>
+    <p class="quiet">This page will notice when the room opens again.</p>
+  </section>
+
+  <p id="unsupported" class="error" hidden>
+    This browser cannot decode the stream (it needs WebCodecs with Opus: a current
+    Chrome, Edge, Firefox on a computer, or Safari 26). Chat still works.
+  </p>
+</main>
+<script src="schedule.js"></script>
+<script src="balcony.js"></script>
+</body>
+</html>
