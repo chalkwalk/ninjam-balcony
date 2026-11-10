@@ -26,6 +26,7 @@ pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
 add_library(balcony_core STATIC
     src/Archive.cpp
     src/Json.cpp
+    src/Listeners.cpp
     src/Mixer.cpp
     src/OpusStream.cpp
     src/WebServer.cpp

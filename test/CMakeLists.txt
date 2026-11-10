@@ -8,6 +8,7 @@ endif()
 
 add_executable(balcony_tests
     JsonTests.cpp
+    ListenersTests.cpp
     MixerTests.cpp
     OpusStreamTests.cpp
     WebServerTests.cpp
