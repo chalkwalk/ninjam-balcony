@@ -258,6 +258,16 @@ Estimates to be measured in the build, not promises (`PRINCIPLES §5`):
   worst. The VM has 2 Gbit/s, and a monthly two-hour jam is a few GB of the
   10 TB a month the free tier allows.
 
+**Measured on the dev machine, 2026-11-10** (Ryzen 9 5900HX, load 0.8; not the VM):
+
+- **Offline, a real archive** (2025-04-02, four players, 88.2 kHz clips):
+  decode plus resample 3.6-4.6 % of a core, the mix 0.6-0.7 % (`docs/COMPLETED.md`).
+- **Live, the whole bot** against a loopback `ninjamsrv`: four players sending
+  48 kHz tones, one web listener, a minute: **2.0 % of one core, 28 MB
+  resident, 12.5 kB/s (100 kbit/s) to the listener.** With 44.1 or 88.2 kHz
+  players, add the resampling above. An A1 core is slower than this one; the
+  real jam's numbers replace these.
+
 ## 9. Build decisions
 
 Settled 2026-11-10, in the overnight period, as starting values; the numbers
