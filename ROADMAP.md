@@ -30,8 +30,8 @@ named, not numbered, and carry checkboxes. Anything left open in `DESIGN §9` is
 The server writes every interval of a jam to its session archive, so most of the bot can be
 built and measured against a real jam without a room.
 
-- [ ] **Skeleton.** CMake, `chalkwalk-ninjam` and `chalkwalk-dsp` as submodules under
-      `libs/` (as `chalkwalk-jambot` takes them), a test target, CI later.
+- [ ] **Skeleton.** C++17, CMake, `chalkwalk-ninjam` and `chalkwalk-dsp` as submodules
+      under `libs/` (as `chalkwalk-jambot` takes them), a test target, CI later.
 - [ ] **Mix an archived jam.** Decode every channel, measure per-channel loudness over the
       sliding window, gain, pan, sum to about -16 LUFS through a limiter (`DESIGN §6`).
       Write a WAV; measure it. Tune window and slew here.
@@ -40,8 +40,15 @@ built and measured against a real jam without a room.
 
 ## The bot, live
 
-- [ ] **Join a room.** Against a local `ninjamsrv`: log in (with `H` where configured),
-      announce what it is, receive intervals, send nothing (`DESIGN §3`, `§4`).
+- [ ] **A headless client.** JUCE-free, MIT, in its own directory with no balcony
+      dependencies: socket, login (with `H` where configured), keepalive, interval
+      assembly, chat. Shaped to satisfy jambot's `BotClient.h`. Tested against a local
+      `ninjamsrv` (`DESIGN §7`).
+- [ ] **Join a room.** Announce what it is, receive intervals, send nothing
+      (`DESIGN §3`, `§4`).
+- [ ] **Up and down with the server**: retry until the server accepts, report open only
+      once receiving, tell listeners the jam ended, exit when the server goes
+      (`DESIGN §7.1`).
 - [ ] **Neutral votes** on a server that counts the bot, with `Voting.h` (`GOALS A1`).
 - [ ] **WebSocket out**: audio and meter frames on one socket; status endpoint.
 - [ ] **Chat both ways**: prefixing, arrivals and departures, history on arrival,
@@ -56,13 +63,22 @@ built and measured against a real jam without a room.
       chat, listeners, volume and mute.
 - [ ] **Screen-reader pass** before the first real jam (`PRINCIPLES §8`).
 
+## Shared code, when it is real
+
+- [ ] **Move the headless client out** once a second user exists (a jambot runner that
+      needs no plugin is the likely one): into a repo the balcony and jambot share, or
+      into jambot if that is where it fits. Not before (`DESIGN §7`).
+
 ## On the VM
 
 Read `/home/programming/ecosystem/docs/hosting.md` first. The VM, its ports and
 `ninjam-room` are chalkwalk's.
 
-- [ ] **Deploy**: Caddy, ports 443 and 80 in both the security list and iptables, a
-      systemd unit after `ninjam.service`, `ninjam-room open|close` starting the bot.
+- [ ] **Deploy**: Caddy (always on, with the static "closed" status when the bot is
+      down), ports 443 and 80 in both the security list and iptables, a systemd unit
+      after `ninjam.service` that is not restarted into an empty room, and
+      `ninjam-room open|close` bringing the bot up after the server and down before it
+      (`DESIGN §7.1`).
 - [ ] **DNS**: `ninjam.chalkwalkmusic.com` (chalkwalk edits DNS).
 - [ ] **A dress rehearsal** with two or three people before the first public jam.
 - [ ] **Measure a real jam** (CPU, memory, network) and replace the estimates in

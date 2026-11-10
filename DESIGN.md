@@ -13,8 +13,9 @@ client's repository, "A listener bot, as a companion repository"; this document
 supersedes that sketch where they differ.*
 
 *2026-11-09: moved from `docs/DESIGN.md` to the root, its goals, non-goals and
-anti-goals moved to `GOALS.md`, and its sections numbered. No design decision
-changed.*
+anti-goals moved to `GOALS.md`, and its sections numbered. Then, from the owner:
+chalkwalk-ninjam as the spine, chalkwalk-jambot as the reference, the rule for
+shared code, and bring-up and tear-down with the server (§7, §7.1).*
 
 ## 1. Why
 
@@ -125,10 +126,27 @@ seconds of delay and loses the meters' timing.
 ## 7. Shape and where it runs
 
 - **This repository**, a peer of the Ninjam client and chalkwalk-jambot, not a
-  library (named by the owner: the `chalkwalk-` prefix is for libraries)
-  **(my call:** C++, on chalkwalk-ninjam for the protocol, Vorbis and
+  library (named by the owner: the `chalkwalk-` prefix is for libraries).
+  C++17 **(my call:** on chalkwalk-ninjam for the protocol, Vorbis and
   `Voting.h`; chalkwalk-dsp for loudness; libopus; a small WebSocket server).
   The page is plain HTML and JavaScript, no framework.
+- **The spine is chalkwalk-ninjam** (owner, 2026-11-09). It builds and parses
+  messages and decodes Vorbis, and is deliberately not a client: no socket, no
+  thread. `ChannelMix.h` is the mix's starting point.
+- **chalkwalk-jambot is the reference** for a bot that lives in a room: its
+  `BotClient.h` is the room as a bot sees it (connect, chat, members, intervals
+  received, a timer the host supplies), and its chat and vote handling is how a
+  bot of ours behaves. It is read, not linked, until there is code worth sharing.
+- **Shared code** (owner, 2026-11-09): our libraries are C++17 and MIT. If the
+  balcony needs a significant piece of jambot, it takes jambot as a submodule;
+  if the balcony and jambot both need something neither has, it becomes a repo
+  they share. The first candidate is the connection itself -- a JUCE-free,
+  headless Ninjam client (socket, login, keepalive, interval assembly, chat)
+  that would also let the jambots run without a plugin around them. The only
+  client of ours today is inside the GPLv3 plugin and built on JUCE. **(my
+  call:** write it here first, in its own directory with no balcony
+  dependencies and MIT from its first line, shaped to satisfy `BotClient.h`; move
+  it out when a second user is real, not before.)
 - **On the improv VM** (Oracle A1.Flex, 2 cores, 12 GB, San Jose), beside
   `ninjamsrv`, connecting to it on loopback.
 - **Caddy**, always on, serves the static page over HTTPS with automatic
@@ -137,6 +155,29 @@ seconds of delay and loses the meters' timing.
   Oracle security list and the VM's iptables.
 - **`ninjam-room open` / `close`** start and stop the bot with the server; the
   bot runs as its own systemd unit, after `ninjam.service`.
+
+### 7.1 Up and down with the server
+
+The URL is fixed and always answers; the bot exists only while the room is
+open. So the page and its status never depend on the bot running:
+
+- **Always on (Caddy):** the static page, and the status endpoint's answer when
+  the bot is not there. Caddy proxies status to the bot and, when the bot does
+  not answer, returns a static "closed" status itself **(my call)**. The page
+  computes the next jam's date on its own (`DESIGN §2`), so a closed room needs
+  nothing from the VM but the page.
+- **Bring-up:** `ninjam-room open` starts the server, then the bot. The bot
+  retries its connection with backoff until the server accepts it, and reports
+  "open" only once it is in the room and receiving **(my call)**. Waiting pages
+  switch over on their next poll.
+- **Tear-down:** `ninjam-room close` stops the bot first, so it can tell its
+  listeners the jam has ended and close their sockets cleanly, then the server
+  **(my call)**. If the server goes first (a crash, or closed by hand), the bot
+  says the same, reports "closed", and exits; systemd does not restart it into
+  an empty room.
+- **A restart mid-jam** (the bot crashes, or is redeployed) costs listeners a
+  reconnect: the page retries on its own, and the room sees the bot leave and
+  rejoin once.
 
 ## 8. Will it fit the machine
 
@@ -157,6 +198,8 @@ Estimates to be measured in the build, not promises (`PRINCIPLES §5`):
 Each of these is decided here, in this document, before it is built:
 
 - WebSocket and Opus libraries; the wire format between bot and page.
+- The headless client's interface: `BotClient.h` as it stands, or a narrower
+  one it can grow into (`DESIGN §7`).
 - Exact rate limits, line cap, history length, window length and gain slew.
 - How the page polls status, and what it shows while connecting.
 - The bot's username and join message wording.

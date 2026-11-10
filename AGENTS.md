@@ -10,8 +10,13 @@ project.
 A listener bot for a Ninjam server. It joins the room as one user, mixes the jam to one
 loudness-matched stereo stream, and serves it, with the room's chat, to any number of
 browsers over a WebSocket. Built for the monthly improv room on the Oracle VM, but it must
-work with any stock server. C++ on `chalkwalk-ninjam` and `chalkwalk-dsp`; a plain
+work with any stock server. C++17 on `chalkwalk-ninjam` (the spine) and `chalkwalk-dsp`;
+`chalkwalk-jambot` is the reference for how a bot of ours lives in a room. A plain
 HTML/JavaScript page. **Designed, not built.**
+
+The bot runs only while the room is open: `ninjam-room open` brings it up after the
+server and `close` takes it down first. The URL is always up, and says when the next jam
+is (`DESIGN §7.1`).
 
 ## The documents and how to use them
 
@@ -39,7 +44,10 @@ Order for new work: **PRINCIPLES -> GOALS -> DESIGN -> ROADMAP -> HANDOFF**.
 - **The session archive is the test fixture.** Most of the sound work can be built and
   measured offline against an archived jam; prefer that to a live room.
 - Changes to the shared libraries go to `chalkwalk-ninjam` / `chalkwalk-dsp`, not to a
-  local copy (`PRINCIPLES §9`).
+  local copy (`PRINCIPLES §9`). Our libraries are C++17 and MIT.
+- **Code that may become shared is written as if it already were**: its own directory,
+  no includes from the rest of the balcony, JUCE-free, MIT. The headless client is the
+  first (`DESIGN §7`).
 
 ## Documentation maintenance
 
