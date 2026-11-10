@@ -243,16 +243,122 @@ Estimates to be measured in the build, not promises (`PRINCIPLES §5`):
   worst. The VM has 2 Gbit/s, and a monthly two-hour jam is a few GB of the
   10 TB a month the free tier allows.
 
-## 9. Left to the builder
+## 9. Build decisions
 
-Each of these is decided here, in this document, before it is built:
+Settled 2026-11-10, in the overnight period, as starting values; the numbers
+are tuned against archived jams (§9.4) and changed here when they are.
+**(my calls throughout, listed for the owner in the period's decisions.)**
 
-- WebSocket and Opus libraries; the wire format between bot and page.
-- The headless client's interface: `BotClient.h` as it stands, or a narrower
-  one it can grow into (`DESIGN §7`).
-- Exact rate limits, line cap, history length, window length and gain slew.
-- How the page polls status, and what it shows while connecting.
-- The bot's username and join message wording.
+### 9.1 Where each piece lives
+
+| Piece | Home | Why |
+|---|---|---|
+| Socket client (`BotClient::Client` over TCP) | chalkwalk-jambot | Its README's missing piece; the jambots need it to run without a plugin |
+| Volume and pan on `BotClient::Channel` | chalkwalk-jambot | The interface carries what a bot decides with |
+| Sliding gated loudness (BS.1770 over a moving window) | chalkwalk-dsp | A meter, beside `Loudness.h`; nothing balcony-specific in it |
+| Lookahead peak limiter | chalkwalk-dsp | Same |
+| Archive reader (`clipsort.log` + clips) | chalkwalk-ninjam | The server's archive format is a Ninjam fact; anything that renders stems needs it |
+| Gain riding, the mix, Opus, WebSocket server, page, chat relay | here | What the balcony is |
+
+Library work happens on a branch in a worktree of that library (never in a
+tree someone else has open), committed locally; the balcony builds against
+it with the `CHALKWALK_<LIB>_DIR` override until the branch is merged and the
+submodule bumped.
+
+### 9.2 Libraries
+
+- **Opus:** libopus (BSD), the system package (`libopus-dev`; on the VM,
+  `libopus0`), through `pkg-config`. 48 kHz stereo, 20 ms frames, 96 kbit/s VBR,
+  application `AUDIO`.
+- **WebSocket and HTTP:** first-party (owner: "first party unless there is a
+  strong reason"). One thread, `poll()` over non-blocking sockets, on loopback
+  only: Caddy terminates TLS and HTTP/2 in front. The bot serves exactly two
+  things: `GET /status` (JSON) and the WebSocket upgrade at `/ws`. RFC 6455
+  server side: handshake (SHA-1 from chalkwalk-ninjam, base64 here), unmasking,
+  text and binary frames, ping/pong, close; no extensions (no
+  permessage-deflate: audio does not compress).
+- **Page:** WebCodecs `AudioDecoder` (`codec: "opus"`), feature-detected with
+  `isConfigSupported`. Where it is missing (Firefox for Android, Safari before
+  26), the page says so plainly for now; a wasm Opus decoder is a later roadmap
+  item. Playback through an `AudioWorklet` reading a jitter buffer.
+
+### 9.3 The wire between bot and page
+
+One WebSocket per listener. **Text frames are JSON** for everything said;
+**binary frames are audio and meters**, so the hot path never parses JSON.
+
+Page to bot (text): `{"t":"hello","name":"Alice"}` once; `{"t":"say","text":"..."}`;
+nothing else is accepted.
+
+Bot to page (text):
+- `{"t":"welcome","you":"Alice","bpm":100,"bpi":16,"sampleRate":48000}` or
+  `{"t":"refused","why":"name-taken"|"name-invalid"|"full"|"blocked"}`
+- `{"t":"room","players":[{"name":"jgorbe","channels":[{"id":3,"name":"default channel","inStream":true}]}],"listeners":["Alice","Bob"]}`
+  -- the whole picture, sent on welcome and whenever it changes. A channel's
+  `id` is the bot's, stable while the channel exists; meters refer to it.
+- `{"t":"chat","from":"jgorbe","text":"...","kind":"player"|"listener"|"room"|"bot","at":1731234567}`
+  -- `history` on welcome is an array of these.
+- `{"t":"config","bpm":110,"bpi":16}` when the room changes tempo.
+- `{"t":"closing","why":"sent-away"|"server-closed"|"kicked"}` before the bot
+  closes the socket.
+
+Bot to page (binary), little-endian, one message per 60 ms (three Opus frames):
+
+```
+u8   kind = 1
+u8   frames (n)
+u32  sample position of the first frame (48 kHz, since the bot started)
+n x { u16 length, length bytes of Opus packet }
+u8   meters (m)
+m x { u16 channel id, u8 peak, u8 loudness }   -- 0..255 = -60..0 dBFS in
+                                                  0.25 dB steps, for the 60 ms
+```
+
+Meters ride with the audio they describe, so the page shows each set when the
+worklet plays that sample position (`PRINCIPLES §4`).
+
+### 9.4 The sound's starting values
+
+- Window: 60 s of 400 ms blocks every 100 ms, gated as BS.1770 (absolute
+  -70 LUFS, relative -10 LU) -- the integrated measurement, over a moving window.
+- A channel is not ridden until it has 10 s of ungated blocks in the window;
+  until then its gain is 0 dB.
+- Target per channel: -23 LUFS. Gain clamped to -12..+12 dB, slewed at most
+  1 dB per second, smoothed per sample so a step never clicks.
+- Master: the sum's own sliding loudness rides it toward -16 LUFS by the same
+  rules, then a lookahead peak limiter (5 ms lookahead, 50 ms release, ceiling
+  -1 dBFS sample peak).
+- Per-interval silence (a player who sent nothing) is silence, not a held
+  level.
+
+### 9.5 Chat and moderation values
+
+- Rate limit per listener: 3 lines per 10 s, burst 3; over it, the line is
+  refused with a note to that listener only. Line cap 200 characters.
+- History on arrival: the last 5 minutes, at most 100 lines, held in memory.
+- Names: 1-24 characters of letters, digits, `_`, `-`, `.` and single spaces;
+  unique among listeners, and not the name of a player in the room (compared
+  without the `@ip` part, case-insensitively).
+- Status polling: once a minute while closed, and the page also retries the
+  WebSocket every 30 s while it shows "connecting".
+
+### 9.6 What the bot says in the room
+
+- On joining: `balcony here: people are listening to this room on the web at
+  <url>. Say "balcony, leave me out" to be left out of the stream, or "balcony,
+  leave" to send the balcony away.`
+- Batched arrivals: `Alice and Bob joined the balcony, Carol left (7
+  listening)`.
+- Leaving: `balcony leaving: the stream has ended.`
+
+### 9.7 Testing without a room: replay
+
+The bot has a second source besides the room: **replay**, which reads a
+session archive and delivers its intervals on the bot's own grid as if they
+had arrived from the server, with the archive's players and channels as the
+room. Everything from the mix outwards -- loudness, Opus, the WebSocket, the
+page -- is tested end to end with it, and the same source makes a fixture for
+the tests. Replay never sends anything anywhere but its listeners.
 
 ## 10. Prior art
 
