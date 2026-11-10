@@ -68,8 +68,17 @@
     return typeof AudioDecoder !== 'undefined' && typeof AudioWorkletNode !== 'undefined';
   }
 
+  // For checking a browser without ears (headless tests): how much came in
+  // and how much the decoder gave back. Read-only; nothing depends on it.
+  const stats = { messages: 0, decoded: 0, decodeErrors: 0 };
+  window.balconyStats = stats;
+
   async function startAudio() {
     ctx = new AudioContext({ sampleRate: RATE, latencyHint: 'playback' });
+    // Created inside the click, but some browsers still start it suspended
+    // (Safari, Firefox with autoplay blocked): ask, and offer a button if not.
+    ctx.resume().catch(() => {});
+    ctx.onstatechange = showStartSound;
     await ctx.audioWorklet.addModule('player-worklet.js');
     player = new AudioWorkletNode(ctx, 'balcony-player', {
       numberOfOutputs: 1, outputChannelCount: [2],
@@ -94,18 +103,27 @@
         data.copyTo(right, { planeIndex: data.numberOfChannels > 1 ? 1 : 0, format: 'f32-planar' });
         const pos = Math.round(data.timestamp * RATE / 1e6);
         data.close();
+        stats.decoded += 1;
         player.port.postMessage({ pos, left, right }, [left.buffer, right.buffer]);
       },
-      error: (e) => console.warn('decoder', e),
+      error: (e) => { stats.decodeErrors += 1; console.warn('decoder', e); },
     });
     decoder.configure(config);
     if (ctx.sampleRate !== RATE) console.warn('context runs at', ctx.sampleRate);
   }
 
+  function showStartSound() {
+    $('start-sound').hidden = !ctx || ctx.state === 'running' || ctx.state === 'closed';
+  }
+  $('start-sound').addEventListener('click', () => {
+    if (ctx) ctx.resume().then(showStartSound, () => {});
+  });
+
   function stopAudio() {
     try { decoder && decoder.state !== 'closed' && decoder.close(); } catch (e) { /* gone */ }
     try { ctx && ctx.close(); } catch (e) { /* gone */ }
     ctx = gain = player = decoder = null;
+    $('start-sound').hidden = true;
     playingPos = -1;
     meterQueue.length = 0;
   }
@@ -119,6 +137,7 @@
 
   // One binary message: kind, frame count, u32 position, Opus frames, meters.
   function onAudio(buf) {
+    stats.messages += 1;
     const v = new DataView(buf);
     if (v.getUint8(0) !== 1) return;
     const frames = v.getUint8(1);
@@ -246,6 +265,7 @@
         case 'welcome': {
           me = m.you;
           show('listening');
+          setTimeout(showStartSound, 1000);
           $('listening-heading').focus();
           const seconds = m.bpm ? (60 * m.bpi / m.bpm) : 0;
           $('delay-note').textContent = seconds
@@ -254,6 +274,7 @@
           break;
         }
         case 'refused':
+          show('join');
           $('name-error').textContent = {
             'name-taken': 'Someone here already has that name; please choose another.',
             'name-invalid': 'That name has a character it cannot have.',
@@ -294,22 +315,39 @@
       stopAudio();
       if (!me) return;
       me = null;
-      $('ended-why').textContent = {
+      const why = {
         'sent-away': 'The players asked the balcony to leave.',
         kicked: 'You were asked to leave by the room.',
         'server-closed': 'The jam is over.',
-      }[endedBy] || 'The connection was lost.';
+      }[endedBy];
+      // An ending the room chose is final. A dropped connection is not: try
+      // again every 30 s while the room is open (DESIGN §9.5).
+      $('ended-why').textContent = why || 'The connection was lost. Trying again every 30 seconds…';
       show('ended');
       $('ended-heading').focus();
-      pollStatus();
+      if (!why) retryTimer = setTimeout(retry, 30000);
+      else pollStatus();
     };
   }
 
-  $('join-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    $('name-error').textContent = '';
-    const name = $('name').value.trim().replace(/\s+/g, ' ');
-    if (!name) return;
+  let lastName = '', retryTimer = null;
+
+  async function retry() {
+    retryTimer = null;
+    let s = { open: false };
+    try {
+      const r = await fetch(statusUrl, { cache: 'no-store' });
+      if (r.ok) s = await r.json();
+    } catch (e) { /* still down */ }
+    if (!s.open) {
+      retryTimer = setTimeout(retry, 30000);
+      return;
+    }
+    await begin(lastName);
+  }
+
+  async function begin(name) {
+    lastName = name;
     if (canDecode()) {
       try { await startAudio(); } catch (err) {
         stopAudio();
@@ -322,6 +360,15 @@
     roomSeen = false;
     $('log').textContent = '';
     connect(name);
+  }
+
+  $('join-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('name-error').textContent = '';
+    const name = $('name').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    clearTimeout(retryTimer);
+    await begin(name);
   });
 
   $('say-form').addEventListener('submit', (e) => {

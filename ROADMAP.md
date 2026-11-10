@@ -20,8 +20,11 @@ named, not numbered, and carry checkboxes.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.
-- [ ] **Other browsers.** Checked in Chrome only. Firefox and Safari (WebCodecs audio is
-      recent there); a wasm Opus fallback if one of them lacks it.
+- [ ] **Other browsers.** Chrome: plays, checked headless. Firefox 159: WebCodecs Opus
+      decodes the stream without error (checked headless), but headless Firefox has no
+      audio device here, so playback itself is unheard; check it with ears. Safari and
+      phones: untested (WebCodecs audio is recent in Safari); a wasm Opus fallback if
+      one lacks it.
 - [ ] **Screen-reader pass** (`PRINCIPLES §8`).
 - [ ] **A dress rehearsal** with two or three people before the first public jam.
 - [ ] **Measure a real jam** (CPU, memory, network; `ninjam-room metrics`) and replace
