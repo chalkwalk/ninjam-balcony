@@ -1,0 +1,15 @@
+const list = await (await fetch('http://127.0.0.1:9333/json/list')).json();
+const ws = new WebSocket(list.find(t => t.type === 'page').webSocketDebuggerUrl);
+await new Promise(r => ws.onopen = r);
+let id = 0; const waits = new Map(); const errs = [];
+ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && waits.has(m.id)) { waits.get(m.id)(m); waits.delete(m.id); } if (m.method === 'Runtime.exceptionThrown') errs.push(m.params.exceptionDetails.exception?.description); };
+const send = (method, params = {}) => new Promise(r => { const i = ++id; waits.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+const ev = async (x) => (await send('Runtime.evaluate', { expression: x, awaitPromise: true, returnByValue: true })).result.result?.value;
+await send('Runtime.enable'); await send('Page.enable');
+await send('Emulation.setTimezoneOverride', { timezoneId: 'Europe/London' });
+await send('Page.navigate', { url: 'http://127.0.0.1:18081/' }); await new Promise(r => setTimeout(r, 2000));
+console.log(JSON.stringify(await ev(`({view: ['closed','join','listening','ended'].filter(v => !document.getElementById(v).hidden).join(), next: document.getElementById('next-jam').textContent, ics: document.getElementById('ics').href.slice(0,5), gcal: document.getElementById('gcal').href.slice(0,60), title: document.title})`), null, 1));
+const ics = await ev(`fetch(document.getElementById('ics').href).then(r => r.text())`);
+console.log(ics.split('\n').filter(l => /DTSTART|RRULE|SUMMARY/.test(l)).join('\n'));
+console.log('errors:', errs);
+ws.close();
