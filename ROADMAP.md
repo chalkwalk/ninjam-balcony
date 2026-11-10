@@ -10,13 +10,8 @@ named, not numbered, and carry checkboxes. Anything left open in `DESIGN §9` is
 
 ## Before building
 
-- [ ] **The owner accepts `PRINCIPLES.md` and `GOALS.md`**, or changes them. Both are drafts
-      lifted from the design; the parts marked **(draft)** went beyond what was agreed.
-- [ ] **Look for prior art.** A search on 2026-11-06 found no open-source Ninjam-to-web
-      listener. Leads still to check: ninbot.com (publishes session recordings, may
-      stream); the NINJAM forum; BHSPitMonkey/ninjam-js (a JS client needing Electron or a
-      Chrome App for raw TCP). Groups that stream today seem to use OBS. If a good one
-      exists, contribute to it instead.
+- [ ] **The owner accepts `GOALS.md`**, or changes it. (`PRINCIPLES.md` accepted
+      2026-11-09; prior art done, `docs/COMPLETED.md`.)
 - [ ] **Publish, when it is ready.** Local until the owner decides it is ready, then
       GitHub, probably under GPLv3 (decided then, not now). The libraries it stands on
       (`chalkwalk-*` MIT, libopus BSD, libebur128 MIT) are all GPLv3-compatible. Brings
@@ -38,17 +33,25 @@ built and measured against a real jam without a room.
 - [ ] **Encode it.** One Opus stream; measure CPU per interval on this machine, then
       estimate the VM's.
 
+## In chalkwalk-jambot first
+
+Built there, with clean edges, because jambot needs them too (`DESIGN §7`). Each lands in
+jambot with its own tests before the balcony uses it.
+
+- [ ] **A JUCE-free socket client** implementing `BotClient::Client`: login (with the `H`
+      privilege where the account has it), keepalive, interval download and Vorbis decode,
+      chat, membership. The item jambot's README already lists as "Not yet done". Tested
+      against a local `ninjamsrv`.
+- [ ] **Volume and pan on `BotClient::Channel`**, as the player set them.
+- [ ] **Take jambot as a submodule** here (`libs/jambot`), beside `chalkwalk-ninjam` and
+      `chalkwalk-dsp`.
+
 ## The bot, live
 
-- [ ] **A headless client.** JUCE-free, MIT, in its own directory with no balcony
-      dependencies: socket, login (with `H` where configured), keepalive, interval
-      assembly, chat. Shaped to satisfy jambot's `BotClient.h`. Tested against a local
-      `ninjamsrv` (`DESIGN §7`).
 - [ ] **Join a room.** Announce what it is, receive intervals, send nothing
       (`DESIGN §3`, `§4`).
-- [ ] **Up and down with the server**: retry until the server accepts, report open only
-      once receiving, tell listeners the jam ended, exit when the server goes
-      (`DESIGN §7.1`).
+- [ ] **Up and down with the server**: report open only once receiving; on a kick, a
+      drop or the server going, tell listeners and exit, never reconnect (`DESIGN §7.1`).
 - [ ] **Neutral votes** on a server that counts the bot, with `Voting.h` (`GOALS A1`).
 - [ ] **WebSocket out**: audio and meter frames on one socket; status endpoint.
 - [ ] **Chat both ways**: prefixing, arrivals and departures, history on arrival,
@@ -63,11 +66,10 @@ built and measured against a real jam without a room.
       chat, listeners, volume and mute.
 - [ ] **Screen-reader pass** before the first real jam (`PRINCIPLES §8`).
 
-## Shared code, when it is real
+## Shared code, if the edges say so
 
-- [ ] **Move the headless client out** once a second user exists (a jambot runner that
-      needs no plugin is the likely one): into a repo the balcony and jambot share, or
-      into jambot if that is where it fits. Not before (`DESIGN §7`).
+- [ ] **A base repository**, only if the balcony ends up using jambot's client and grid
+      but not its band: move those pieces to a repository both submodule (`DESIGN §7`).
 
 ## On the VM
 

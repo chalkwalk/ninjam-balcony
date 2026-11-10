@@ -6,9 +6,7 @@ principle is changed deliberately, in its own commit, with the reason given. Cit
 refuses, is in [GOALS.md](GOALS.md) (`G1`, `N1`, `A1`); how it works is
 [DESIGN.md](DESIGN.md).
 
-> Draft, 2026-11-09, drawn from the design agreed with the owner on 2026-11-08. Not yet
-> accepted by the owner. Where the draft goes beyond what that conversation settled, it says
-> **(draft)**.
+> Accepted by the owner, 2026-11-09.
 
 ## North star
 
@@ -60,7 +58,7 @@ changed first, deliberately (see above). The principle named owns the test.
    patched locally.
 10. **Page** (§10). Clears: the page is HTML, CSS and JavaScript served as written, plus
     the one wasm decoder. Fails: a framework, a bundler or build step for the page, or a
-    runtime dependency fetched from a third-party CDN. **(draft)**
+    runtime dependency fetched from a third-party CDN.
 11. **Footprint** (§11). Clears: measured (or, before the VM, estimated per §5) to fit in
     the VM beside `ninjamsrv` with a full room, and it degrades before the server is
     starved. Fails: a cost that grows with listeners beyond bandwidth, or anything that can
@@ -121,11 +119,10 @@ The protocol, the vote arithmetic and the loudness meter come from `chalkwalk-ni
 ## §10 A plain page
 
 The listener page is plain HTML and JavaScript, no framework. It must keep working when
-nobody has touched it for a year. **(draft)**
+nobody has touched it for a year.
 
 ## §11 Small enough for the free VM
 
 The bot shares a 2-core Always Free VM with `ninjamsrv` and must never make the room worse
 to play in. If it ever competes with the server for CPU, the server wins and the balcony
 degrades (fewer meter frames, then a lower bitrate) before the players notice anything.
-**(draft)**

@@ -14,8 +14,9 @@ supersedes that sketch where they differ.*
 
 *2026-11-09: moved from `docs/DESIGN.md` to the root, its goals, non-goals and
 anti-goals moved to `GOALS.md`, and its sections numbered. Then, from the owner:
-chalkwalk-ninjam as the spine, chalkwalk-jambot as the reference, the rule for
-shared code, and bring-up and tear-down with the server (§7, §7.1).*
+chalkwalk-ninjam as the spine, chalkwalk-jambot as the framework, shared pieces
+built in jambot, and bring-up and tear-down with the server (§7, §7.1). Prior
+art searched (§10).*
 
 ## 1. Why
 
@@ -111,7 +112,11 @@ encodes once, so the cost per listener is one stream however many play.
 - **Gain** brings each channel toward a common level, moving slowly and smoothly
   so nobody pumps; a channel that has not yet sounded gets no gain until it
   does, so a quiet player is not lifted into noise.
-- **Pan** as each player set it.
+- **Pan** as each player set it (needs `BotClient` to carry it, §7).
+- **Playout** on the bot's own free-running interval grid (jambot's
+  `IntervalPump`), as every client does: a channel's interval received during
+  interval N is mixed into interval N+1. Interval phase between clients is
+  free, so following nobody's grid costs nothing audible.
 - **Sum** aimed at about -16 LUFS, a common web listening level, through a
   limiter so it never clips **(my call)**.
 - chalkwalk-dsp's `Loudness.h` (libebur128) is the instrument -- the same one
@@ -133,20 +138,31 @@ seconds of delay and loses the meters' timing.
 - **The spine is chalkwalk-ninjam** (owner, 2026-11-09). It builds and parses
   messages and decodes Vorbis, and is deliberately not a client: no socket, no
   thread. `ChannelMix.h` is the mix's starting point.
-- **chalkwalk-jambot is the reference** for a bot that lives in a room: its
-  `BotClient.h` is the room as a bot sees it (connect, chat, members, intervals
-  received, a timer the host supplies), and its chat and vote handling is how a
-  bot of ours behaves. It is read, not linked, until there is code worth sharing.
-- **Shared code** (owner, 2026-11-09): our libraries are C++17 and MIT. If the
-  balcony needs a significant piece of jambot, it takes jambot as a submodule;
-  if the balcony and jambot both need something neither has, it becomes a repo
-  they share. The first candidate is the connection itself -- a JUCE-free,
-  headless Ninjam client (socket, login, keepalive, interval assembly, chat)
-  that would also let the jambots run without a plugin around them. The only
-  client of ours today is inside the GPLv3 plugin and built on JUCE. **(my
-  call:** write it here first, in its own directory with no balcony
-  dependencies and MIT from its first line, shaped to satisfy `BotClient.h`; move
-  it out when a second user is real, not before.)
+- **chalkwalk-jambot is the framework** for a bot that lives in a room. Its
+  `BotClient.h` is the room as a bot sees it -- connect, chat, members and
+  their channels, `setRecv`, decoded intervals delivered whole
+  (`onIntervalReceived`), and timers on the client's one callback thread -- and
+  the balcony is a `BotClient::Listener` like any of its bots. Its
+  `IntervalPump.h` is the free-running interval grid the mix plays out on
+  (§6). Its rules for how a bot behaves in a room (`JAMBOT §8`: an ordinary
+  client, as easy to get rid of as any player) are the balcony's too.
+- **Shared code** (owner, 2026-11-09): our libraries are C++17 and MIT. A piece
+  the balcony needs that jambot should also have is built **in jambot**, with
+  clean edges, and the balcony takes jambot as a submodule. If the balcony ends
+  up wanting only those pieces and not the band, they move to a base repository
+  both submodule.
+- **The first shared piece is the client.** `chalkwalk-ninjam` is the protocol
+  but deliberately no socket; jambot has the interface but, in its own words,
+  "no client yet. A JUCE-free socket client is what stands between this library
+  and `jambot --connect host:port`." The only implementation of `BotClient` is
+  inside the GPLv3 plugin, on JUCE. So a JUCE-free, headless
+  `BotClient::Client` over a socket -- login, keepalive, interval assembly and
+  Vorbis decode, chat -- is built in jambot, and both the balcony and a
+  command-line band use it.
+- **What `BotClient` lacks for the balcony:** each channel's volume and pan as
+  its player set them (`chalkwalk-ninjam` already parses both from
+  `USERINFO_CHANGE_NOTIFY`; `BotClient::Channel` does not carry them). Added to
+  the interface in jambot, not worked around here.
 - **On the improv VM** (Oracle A1.Flex, 2 cores, 12 GB, San Jose), beside
   `ninjamsrv`, connecting to it on loopback.
 - **Caddy**, always on, serves the static page over HTTPS with automatic
@@ -166,10 +182,18 @@ open. So the page and its status never depend on the bot running:
   not answer, returns a static "closed" status itself **(my call)**. The page
   computes the next jam's date on its own (`DESIGN §2`), so a closed room needs
   nothing from the VM but the page.
-- **Bring-up:** `ninjam-room open` starts the server, then the bot. The bot
-  retries its connection with backoff until the server accepts it, and reports
-  "open" only once it is in the room and receiving **(my call)**. Waiting pages
-  switch over on their next poll.
+- **Bring-up:** `ninjam-room open` starts the server, waits until it accepts
+  connections, then starts the bot. The bot reports "open" only once it is in
+  the room and receiving **(my call)**. Waiting pages switch over on their next
+  poll.
+- **No reconnecting.** `BotClient::Client::disconnect` is terminal and there is
+  no retry, by jambot's rule: a bot that reconnects is a bot nobody can get rid
+  of. If the bot is kicked, or its connection drops, it tells its listeners and
+  exits; only `ninjam-room open` (or a person restarting the unit) brings it
+  back. A dropped connection mid-jam therefore ends the balcony for that jam
+  unless someone restarts it **(my call;** the alternative, an automatic rejoin
+  after a drop but never after a kick, needs the bot to tell the two apart, and
+  the server does not say).
 - **Tear-down:** `ninjam-room close` stops the bot first, so it can tell its
   listeners the jam has ended and close their sockets cleanly, then the server
   **(my call)**. If the server goes first (a crash, or closed by hand), the bot
@@ -203,3 +227,24 @@ Each of these is decided here, in this document, before it is built:
 - Exact rate limits, line cap, history length, window length and gain slew.
 - How the page polls status, and what it shows while connecting.
 - The bot's username and join message wording.
+
+## 10. Prior art
+
+Searched 2026-11-09 (`docs/COMPLETED.md`, *Prior art*). Nothing open does what
+`GOALS.md` asks, so there is nothing to contribute to instead:
+
+- **ninjamcast**, in the reference Ninjam source (`ninjam/ninjamcast`): a bot
+  that joins a room and feeds an MP3 mix to a SHOUTcast server. The ancestor of
+  the "public streams" some rooms ran. Listen-only, seconds of delay, no chat,
+  no meters, no loudness matching, and on WDL (GPLv2). It is the minimal
+  version of this project: `ninjamcast` plus Icecast plus an `<audio>` element
+  would be a listen-only balcony in an afternoon, and is the fallback if this
+  one is ever abandoned.
+- **NinjamZap** (an iOS client with a hosted service) advertises live web streams
+  and web chat that "reaches the room". Its open core (GPLv2) is the client;
+  how the web side works, and whether it serves rooms outside its own hosting,
+  is not published. Not self-hostable as far as can be seen.
+- **ninjam-js** and **webjam** are clients, not listeners: the first needs
+  Electron or a Chrome App for raw TCP; the second (2013, six commits) is a
+  native client with a browser front end.
+
