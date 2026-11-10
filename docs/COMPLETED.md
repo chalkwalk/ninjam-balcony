@@ -145,3 +145,11 @@ room is empty and the server archives nothing but silence), this machine, quiet:
   moments, current vs mastered and mastered vs unmasked) and browse set
   `ninjam-balcony-mastered` (80-88 min, all three).
 
+**The owner's verdict, blind (2026-11-10):** the mastered chain over the current one
+in all four pairs; mastered against mastered-with-unmasking, two ties and one marginal
+choice each way ("very very close", "can't hear a difference"). Unmasking's dips were
+real, traced over the same 130 minutes at mostly 0.5-1.5 dB and at times the full 2 dB,
+so it is inaudible at that depth rather than idle. **The mastered chain is the default;
+unmasking stays off.** (The Q1 round, the master rider over a quiet passage, came out
+current 2, band dynamics 1, one tie, and is superseded by this.)
+

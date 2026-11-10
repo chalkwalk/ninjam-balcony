@@ -159,7 +159,8 @@ encodes once, so the cost per listener is one stream however many play.
   interval N is mixed into interval N+1. Interval phase between clients is
   free, so following nobody's grid costs nothing audible.
 - **Sum** aimed at about -16 LUFS, a common web listening level, through a
-  limiter so it never clips **(my call)**.
+  limiter so it never clips **(my call)**. This is the first chain; the
+  default is now the mixed-and-mastered one, §6.1, at about -14 LUFS.
 - chalkwalk-dsp's `Loudness.h` (libebur128) is the instrument -- the same one
   the libraries' tests use.
 
@@ -168,7 +169,10 @@ encodes once, so the cost per listener is one stream however many play.
 The owner's ask (2026-11-10, after listening to the first renders): "something
 that feels more like automatic mix and mastering", the chain they use on their
 own output. It is built as a second chain, `MixerConfig::mastered`, beside the
-first, so the two can be compared blind before either is the default.
+first, so the two could be compared blind. **It is the default since
+2026-11-10:** the owner chose it in all four blind pairs against the first chain
+(`docs/COMPLETED.md`). The first stays for comparison renders
+(`balcony-render --plain`).
 
 **Each player's channel:**
 - **Rumble filter.** 12 dB/octave at 35 Hz by default **(my call;** the owner
@@ -199,7 +203,10 @@ first, so the two can be compared blind before either is the default.
   change any of that mid-jam, and a decision made on it would be stuck wrong. A
   21 % offset on a stereo source is a gentle balance shift, and on a bass part a
   barely noticeable one.
-- **Unmasking (experimental, off by default).** Four wide bands (120 Hz, 400 Hz,
+- **Unmasking (experimental, off).** Heard blind against the same chain without
+  it, it made no difference the owner could hear (two ties, one marginal each
+  way), though its dips were real (mostly 0.5-1.5 dB, at times 2); kept off, as
+  not worth its cost or a deeper, colouring dip. Four wide bands (120 Hz, 400 Hz,
   1.5 kHz, 5 kHz). Over about 8 seconds, each band gets an owner: the player
   with the largest share of it (a new owner needs half again the old one's
   share, so it does not flip). Another player with a real share of that band
@@ -423,6 +430,9 @@ Meters ride with the audio they describe, so the page shows each set when the
 worklet plays that sample position (`PRINCIPLES §4`).
 
 ### 9.4 The sound's starting values
+
+*(The first chain's values, kept for `balcony-render --plain`; the default chain's are
+in §6.1 and at the end of this list.)*
 
 - Window: 120 s of 400 ms blocks every 100 ms, gated as BS.1770 (absolute
   -70 LUFS, relative -10 LU) -- the integrated measurement, over a moving window.

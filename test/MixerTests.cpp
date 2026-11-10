@@ -5,6 +5,7 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <cmath>
 #include <vector>
@@ -25,10 +26,23 @@ struct Tone {
   }
 };
 
+// The first chain, which the tests below the mastered ones were written for;
+// `either` runs a rule that must hold in both chains against each.
+MixerConfig plain() {
+  MixerConfig c;
+  c.mastered = false;
+  return c;
+}
+MixerConfig either() {
+  MixerConfig c;
+  c.mastered = GENERATE(false, true);
+  return c;
+}
+
 }  // namespace
 
 TEST_CASE("two players 10 dB apart come out at one level", "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(plain());
   ChannelKey loud{"loud", 0}, quiet{"quiet@1.2.3.x", 0};
   Tone a{440.0, 0.1}, b{660.0, 0.0316};
   std::vector<float> la(kBlock), lb(kBlock), outL(kBlock), outR(kBlock);
@@ -47,7 +61,7 @@ TEST_CASE("two players 10 dB apart come out at one level", "[mixer]") {
 }
 
 TEST_CASE("a player who has barely played is not ridden", "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(either());
   ChannelKey k{"new", 0};
   Tone t{440.0, 0.01};
   std::vector<float> in(kBlock), outL(kBlock), outR(kBlock);
@@ -59,7 +73,7 @@ TEST_CASE("a player who has barely played is not ridden", "[mixer]") {
 }
 
 TEST_CASE("the rider never moves faster than its slew", "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(plain());
   ChannelKey k{"p", 0};
   Tone t{440.0, 0.9};
   std::vector<float> in(kBlock), outL(kBlock), outR(kBlock);
@@ -76,7 +90,7 @@ TEST_CASE("the rider never moves faster than its slew", "[mixer]") {
 
 TEST_CASE("the mix never passes the ceiling and settles at the listening level",
           "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(plain());
   ChannelKey a{"a", 0}, b{"b", 1};
   Tone ta{220.0, 0.95}, tb{330.0, 0.95};
   std::vector<float> la(kBlock), lb(kBlock), outL(kBlock), outR(kBlock), tailL, tailR;
@@ -103,7 +117,7 @@ TEST_CASE("the mix never passes the ceiling and settles at the listening level",
 
 TEST_CASE("a player left out of the stream is not heard but is still measured",
           "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(either());
   ChannelKey k{"shy", 0};
   Tone t{440.0, 0.5};
   std::vector<float> in(kBlock), outL(kBlock), outR(kBlock);
@@ -123,7 +137,7 @@ TEST_CASE("a player left out of the stream is not heard but is still measured",
 
 TEST_CASE("gain is clamped: a channel far too loud is cut by at most 12 dB",
           "[mixer]") {
-  Mixer mixer;
+  Mixer mixer(either());
   ChannelKey k{"blaring", 0};
   Tone t{440.0, 0.5};
   std::vector<float> in(kBlock), outL(kBlock), outR(kBlock);
@@ -135,7 +149,8 @@ TEST_CASE("gain is clamped: a channel far too loud is cut by at most 12 dB",
 }
 
 TEST_CASE("boost is clamped lower than cut, and noise is never lifted", "[mixer]") {
-  Mixer mixer;
+  const MixerConfig c = either();
+  Mixer mixer(c);
   ChannelKey quiet{"quiet", 0}, hiss{"hiss", 0};
   Tone q{440.0, 0.01}, h{440.0, 0.0006};  // about -43 and -65 LUFS
   std::vector<float> lq(kBlock), lh(kBlock), outL(kBlock), outR(kBlock);
@@ -145,7 +160,8 @@ TEST_CASE("boost is clamped lower than cut, and noise is never lifted", "[mixer]
     mixer.process({{&quiet, lq.data(), nullptr, 0.0f, true}, {&hiss, lh.data(), nullptr, 0.0f, true}},
                   kBlock, outL.data(), outR.data());
   }
-  CHECK(mixer.channelGainDb(quiet) == Catch::Approx(9.0).margin(1e-9));
+  CHECK(mixer.channelGainDb(quiet) ==
+        Catch::Approx(c.mastered ? c.channelBoostDb : c.maxBoostDb).margin(1e-9));
   CHECK(mixer.channelGainDb(hiss) == 0.0);
 }
 

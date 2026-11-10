@@ -25,7 +25,7 @@
 // Gain changes are ramped across the block they happen in, so nothing steps.
 // Not real-time: it allocates when a channel first appears.
 //
-// `MixerConfig::mastered` selects the second chain (DESIGN §6.1): a rumble
+// `MixerConfig::mastered` (the default) selects the second chain (DESIGN §6.1): a rumble
 // filter, a rider with a long and a short view, and a soft then a hard limit on
 // each channel; a little automatic spread; a quiet shared room; and on the sum
 // a slower rider of the same kind, a slow tilt toward a usual balance, a glue
@@ -55,8 +55,10 @@ struct MixerConfig {
   double limiterReleaseMs = 50.0;
   double limiterCeilingDb = -1.0;
 
-  // ---- The mastered chain (DESIGN §6.1, §9.4). Off: everything above. ----
-  bool mastered = false;
+  // ---- The mastered chain (DESIGN §6.1, §9.4): the default since the owner
+  // chose it blind, 4 of 4 (2026-11-10). Off: the first chain, above, kept for
+  // comparison renders (`balcony-render --plain`). ----
+  bool mastered = true;
   // Each channel. The rumble filter: 0 Hz is none; order 1 is 6 dB/octave
   // (one pole), 2 is 12 dB/octave (Butterworth).
   double highPassHz = 35.0;

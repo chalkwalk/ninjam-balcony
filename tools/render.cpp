@@ -5,13 +5,14 @@
 //                  [--boost-floor LUFS] [--target LUFS]
 //                  [--master-window S] [--master-max-boost DB]
 //                  [--write-from S] [--write-to S]
-//                  [--mastered [--hp HZ] [--hp-order 1|2] [--no-autopan]
+//                  [--plain] [--mastered [--hp HZ] [--hp-order 1|2] [--no-autopan]
 //                   [--room DB] [--unmask] [--tilt-balance DB] [--tilt-strength X]
 //                   [--master-target LUFS] [--glue-threshold DB]]
 //
 // --write-from/--write-to write only that stretch (seconds of the jam), mixed
 // with everything before it, so an excerpt sounds as it would have live.
-// --mastered selects the mastered chain (DESIGN §6.1); its report adds the
+// The mastered chain (DESIGN §6.1) is the default; --plain renders the first
+// chain instead, for comparison. The mastered report adds the
 // tilt, the sum's low/high balance, and how hard the glue and limits worked.
 // Every render reports the mix's loudness range: the spread of its 3-second
 // loudness, read each second (10th, 50th and 95th percentiles).
@@ -68,7 +69,9 @@ int main(int argc, char **argv) {
     num("--write-from", writeFrom);
     num("--write-to", writeTo);
     if (std::strcmp(argv[i], "--mastered") == 0)
-      cfg.mastered = true;
+      cfg.mastered = true;  // the default; kept so older command lines still work
+    if (std::strcmp(argv[i], "--plain") == 0)
+      cfg.mastered = false;
     if (std::strcmp(argv[i], "--no-autopan") == 0)
       cfg.autoPan = false;
     if (std::strcmp(argv[i], "--unmask") == 0)
@@ -155,7 +158,20 @@ int main(int argc, char **argv) {
       for (const auto &kv : names)
         std::printf(" %s %5.1f/%+5.1f", displayName(kv.first.user).substr(0, 8).c_str(),
                     mixer.channelLufs(kv.first), mixer.channelGainDb(kv.first));
-      std::printf("  | master %+5.1f\n", mixer.masterGainDb());
+      std::printf("  | master %+5.1f", mixer.masterGainDb());
+      if (cfg.unmask) {
+        // Each channel's dips, 120 Hz / 400 Hz / 1.5 kHz / 5 kHz, where any.
+        std::printf("  | dips");
+        for (const auto &kv : names) {
+          double d[Mixer::kBands], deepest = 0.0;
+          for (int b = 0; b < Mixer::kBands; ++b)
+            deepest = std::min(deepest, d[b] = mixer.unmaskDipDb(kv.first, b));
+          if (deepest < -0.05)
+            std::printf(" %s %.1f/%.1f/%.1f/%.1f", displayName(kv.first.user).substr(0, 8).c_str(),
+                        d[0], d[1], d[2], d[3]);
+        }
+      }
+      std::printf("\n");
     }
     if (limitSeconds > 0.0 && audioSeconds >= limitSeconds)
       break;

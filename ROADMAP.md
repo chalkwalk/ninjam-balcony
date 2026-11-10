@@ -17,13 +17,8 @@ named, not numbered, and carry checkboxes.
       admins' names (`deploy/README.md`).
 - [ ] **Deploy** by `deploy/README.md`: build on the VM, Caddy, ports 80/443 in both the
       security list and iptables, enable the unit. The owner's to do or approve.
-- [ ] **Choose the chain.** The mixed-and-mastered chain (DESIGN §6.1) is built
-      behind `MixerConfig::mastered`, off by default, and unmasking behind `unmask`.
-      Blind round `mastered-chain` and browse set `ninjam-balcony-mastered` on
-      blindweb compare them (`docs/COMPLETED.md`). The owner's answer decides the
-      defaults; the bot needs a `--mastered` switch or the new default either way.
-      Also open from the owner's sketch: their 6 dB/octave rumble filter at 100 Hz
-      against the 12 dB/octave at 35 Hz built (`balcony-render --hp 100 --hp-order 1`).
+- [ ] **The owner's rumble filter**, if wanted: their 6 dB/octave at 100 Hz against the
+      12 dB/octave at 35 Hz built (`balcony-render --hp 100 --hp-order 1`), blind.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.
