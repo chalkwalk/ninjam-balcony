@@ -12,10 +12,10 @@ on 11-09/10 (log and open questions in `.autonomy/PLAN.md`, untracked; summary i
   plays a session archive as if live. Both serve the page with `--page web/` for local
   runs. `balcony-render` mixes an archive to WAV; `balcony-fake-player` stands in for a
   player against a local `ninjamsrv`.
-- **Build needs the library branches**, which are local only:
+- **Build needs the ninjam and jambot branches**, which are local only (chalkwalk-dsp's
+  is merged and pushed; `libs/dsp` is pinned to it):
   ```sh
-  cmake -B build -DCHALKWALK_DSP_DIR=/home/programming/chalkwalk-dsp-balcony \
-    -DCHALKWALK_NINJAM_DIR=/home/programming/chalkwalk-ninjam-balcony \
+  cmake -B build -DCHALKWALK_NINJAM_DIR=/home/programming/chalkwalk-ninjam-balcony \
     -DCHALKWALK_JAMBOT_DIR=/home/programming/chalkwalk-jambot-balcony
   ```
 - Tests: the balcony's suite and the page's schedule test pass; jambot's socket client

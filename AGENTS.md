@@ -67,7 +67,7 @@ ctest --test-dir build --output-on-failure
 cmake -B build -DBALCONY_LIBRARY_TESTS=OFF
 
 # A library change on a local branch, before it is pushed and the submodule bumped
-cmake -B build -DCHALKWALK_DSP_DIR=/home/programming/chalkwalk-dsp-balcony
+cmake -B build -DCHALKWALK_DSP_DIR=/home/programming/chalkwalk-dsp-<branch>
 ```
 
 `work/` (untracked) holds local test material: copies of real session archives, which are
