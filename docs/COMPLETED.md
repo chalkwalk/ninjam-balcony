@@ -25,6 +25,35 @@ Sources: <https://github.com/justinfrankel/ninjam> (and the local copy in
 <https://library.vcvrack.com/akaudio/Ninjam>, <https://github.com/BHSPitMonkey/ninjam-js>,
 <https://github.com/bill-auger/webjam>, <https://ninbot.com/>.
 
+## Can the VM mix a room in the gap? (2026-11-09, measured in antiphon)
+
+Measured by an antiphon session before this repository took the question over,
+and moved here on 2026-11-10 (antiphon keeps a one-paragraph pointer). The
+question: decode every channel of an interval, resample, sum and encode one
+stereo stream (128 kbit/s Vorbis then; the bot encodes Opus), timed together on
+one thread, over the 2025-08-06 jam at 100 bpm / 16 bpi (690 intervals of
+9.6 s). `--stack n` decoded each clip n times to stand in for a bigger room.
+
+| Room | Channels per interval | Dev machine: median / worst | VM: median / 95th / worst |
+|---|---|---|---|
+| as recorded | median 2, max 3-4 | 1.29% / 1.51% (120 ms) | 2.65% / 2.91% / 3.20% (307 ms) |
+| stack 5 | median 10, max 15-20 | 2.25% / 2.97% | 4.33% / 5.51% / 6.65% (639 ms) |
+| stack 11 | median 22, max 33-44 | 3.77% / 6.25% (600 ms) | 6.85% / 9.33% / 11.85% (1137 ms) |
+
+- **Dev machine:** Ryzen 9 5900HX, -O2, load about 1.4. **VM:** the Oracle A1
+  (Neoverse-N1), gcc 15.2 at -O2, load about 0.2, room closed, one of its two
+  cores. On the VM the bench was a ~150-line JUCE-free program over
+  chalkwalk-ninjam's Vorbis codec, built by hand (no JUCE on the live room's
+  host), calibrated against antiphon's `antiphon-stems --bench` on the dev
+  machine back to back: median 1.42% against 1.44% as recorded.
+- **The VM is about 1.5 to 1.9 times slower** than the dev machine per core.
+- **Memory is flat in room size:** 38-40 MB peak resident from 2 to 33
+  channels, because each clip is decoded, placed and released before the next.
+- **What it means:** even a 44-channel room costs about a second of a 9.6 s
+  interval on one VM core, leaving the other to `ninjamsrv`; no redesign. The
+  bot's own cost, measured since, is in *The first real mix* below and in
+  DESIGN §8; decode and resample dominate, as here.
+
 ## The first real mix (2026-11-10)
 
 `balcony-render` over the 2025-04-02 improv archive (four players, 113 minutes, 698
