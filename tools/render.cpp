@@ -4,6 +4,17 @@
 //                  [--window S] [--slew DBPS] [--max-boost DB] [--max-cut DB]
 //                  [--boost-floor LUFS] [--target LUFS]
 //                  [--master-window S] [--master-max-boost DB]
+//                  [--write-from S] [--write-to S]
+//                  [--mastered [--hp HZ] [--hp-order 1|2] [--no-autopan]
+//                   [--room DB] [--unmask] [--tilt-balance DB] [--tilt-strength X]
+//                   [--master-target LUFS] [--glue-threshold DB]]
+//
+// --write-from/--write-to write only that stretch (seconds of the jam), mixed
+// with everything before it, so an excerpt sounds as it would have live.
+// --mastered selects the mastered chain (DESIGN §6.1); its report adds the
+// tilt, the sum's low/high balance, and how hard the glue and limits worked.
+// Every render reports the mix's loudness range: the spread of its 3-second
+// loudness, read each second (10th, 50th and 95th percentiles).
 //
 // The archive may be one *.ninjam directory or a directory of them. Prints,
 // per channel, its measured loudness and the gain the rider ended on, then the
@@ -15,7 +26,9 @@
 #include "Wav.h"
 
 #include <chalkwalk/dsp/Loudness.h>
+#include <chalkwalk/dsp/SlidingLoudness.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -31,7 +44,7 @@ int main(int argc, char **argv) {
     std::fprintf(stderr, "usage: %s <archive dir> <out.wav> [--seconds N]\n", argv[0]);
     return 2;
   }
-  double limitSeconds = 0.0;
+  double limitSeconds = 0.0, writeFrom = 0.0, writeTo = 1e12;
   bool trace = false;
   MixerConfig cfg;
   for (int i = 3; i < argc; ++i) {
@@ -52,6 +65,23 @@ int main(int argc, char **argv) {
     num("--target", cfg.channelTargetLufs);
     num("--master-window", cfg.masterWindowSeconds);
     num("--master-max-boost", cfg.masterMaxBoostDb);
+    num("--write-from", writeFrom);
+    num("--write-to", writeTo);
+    if (std::strcmp(argv[i], "--mastered") == 0)
+      cfg.mastered = true;
+    if (std::strcmp(argv[i], "--no-autopan") == 0)
+      cfg.autoPan = false;
+    if (std::strcmp(argv[i], "--unmask") == 0)
+      cfg.unmask = true;
+    double order = cfg.highPassOrder;
+    num("--hp-order", order);
+    cfg.highPassOrder = (int)order;
+    num("--hp", cfg.highPassHz);
+    num("--room", cfg.roomLevelDb);
+    num("--tilt-balance", cfg.tiltBalanceDb);
+    num("--tilt-strength", cfg.tiltStrength);
+    num("--master-target", cfg.masteredTargetLufs);
+    num("--glue-threshold", cfg.glueThresholdDb);
   }
   double nextTrace = 0.0;
 
@@ -68,7 +98,12 @@ int main(int argc, char **argv) {
   }
 
   Mixer mixer(cfg);
-  std::vector<float> outL, outR, allL, allR;
+  std::vector<float> outL, outR;
+  // The whole mix's loudness, kept as it goes (a window longer than any jam),
+  // and its 3-second loudness each second, for the loudness range.
+  chalkwalk::dsp::measure::SlidingLoudness whole(2, rate, 24 * 3600.0);
+  std::vector<double> shortTerm;
+  double nextShort = 3.0;
   std::map<ChannelKey, std::string> names;
   ArchiveInterval iv;
   double decodeSeconds = 0.0, mixSeconds = 0.0, audioSeconds = 0.0;
@@ -98,9 +133,21 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < iv.samples; ++i)
       peak = std::max(peak, std::max(std::fabs(outL[(size_t)i]), std::fabs(outR[(size_t)i])));
-    wav.write(outL.data(), outR.data(), iv.samples);
-    allL.insert(allL.end(), outL.begin(), outL.end());
-    allR.insert(allR.end(), outR.begin(), outR.end());
+    // Only the asked-for stretch is written; all of it is mixed and measured.
+    const double start = audioSeconds;
+    const int from = (int)std::clamp((writeFrom - start) * rate, 0.0, (double)iv.samples);
+    const int to = (int)std::clamp((writeTo - start) * rate, 0.0, (double)iv.samples);
+    if (to > from)
+      wav.write(outL.data() + from, outR.data() + from, to - from);
+    for (int pos = 0; pos < iv.samples; pos += block) {
+      const int n = std::min(block, iv.samples - pos);
+      whole.add(outL.data() + pos, outR.data() + pos, n);
+      if (start + (pos + n) / rate >= nextShort) {
+        nextShort += 1.0;
+        if (whole.gatedSecondsOver(3.0) >= 1.0)
+          shortTerm.push_back(whole.lufsOver(3.0));
+      }
+    }
     audioSeconds += iv.samples / rate;
     if (trace && audioSeconds >= nextTrace) {
       nextTrace += 60.0;
@@ -126,10 +173,26 @@ int main(int argc, char **argv) {
     std::printf("%-28s %-20s %10.1f %+10.1f\n", displayName(kv.first.user).c_str(),
                 kv.second.c_str(), mixer.channelLufs(kv.first),
                 mixer.channelGainDb(kv.first));
-  const double lufs = chalkwalk::dsp::measure::integratedLufs(
-      allL.data(), allR.data(), (int)allL.size(), rate);
+  const double lufs = whole.lufs();
   std::printf("mix: integrated %.1f LUFS, peak %.2f dBFS, master gain %+.1f dB\n", lufs,
               20.0 * std::log10(std::max(peak, 1e-9f)), mixer.masterGainDb());
+  if (!shortTerm.empty()) {
+    std::sort(shortTerm.begin(), shortTerm.end());
+    auto pct = [&](double p) {
+      return shortTerm[(size_t)std::min((double)shortTerm.size() - 1, p * shortTerm.size())];
+    };
+    std::printf("range: 3 s loudness %.1f / %.1f / %.1f LUFS (10th / 50th / 95th), "
+                "spread %.1f LU\n",
+                pct(0.10), pct(0.50), pct(0.95), pct(0.95) - pct(0.10));
+  }
+  if (cfg.mastered) {
+    const auto r = mixer.report();
+    std::printf("master: tilt %+.2f dB now; balance %.1f dB now, %.1f dB over the jam; "
+                "glue %.1f dB mean; soft limit >1 dB in %.1f%% of blocks, brick wall %.1f%%; "
+                "room %.1f dB under the dry sum\n",
+                r.tiltDb, r.balanceDb, r.meanBalanceDb, r.glueMeanDb, 100.0 * r.softShare,
+                100.0 * r.brickShare, r.roomUnderDryDb);
+  }
   std::printf("cost: decode+resample %.1f s, mix %.1f s, for %.1f s of audio "
               "(%.2f%% and %.2f%% of one core)\n",
               decodeSeconds, mixSeconds, audioSeconds,

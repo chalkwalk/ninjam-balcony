@@ -163,6 +163,83 @@ encodes once, so the cost per listener is one stream however many play.
 - chalkwalk-dsp's `Loudness.h` (libebur128) is the instrument -- the same one
   the libraries' tests use.
 
+### 6.1 Mixed and mastered: the second chain
+
+The owner's ask (2026-11-10, after listening to the first renders): "something
+that feels more like automatic mix and mastering", the chain they use on their
+own output. It is built as a second chain, `MixerConfig::mastered`, beside the
+first, so the two can be compared blind before either is the default.
+
+**Each player's channel:**
+- **Rumble filter.** 12 dB/octave at 35 Hz by default **(my call;** the owner
+  proposed 6 dB/octave at 100 or 200 Hz). A 6 dB/octave slope at 100 Hz is -7 dB
+  at 50 Hz and -11 dB at 30 Hz: it takes most of a synth bass's fundamental with
+  the rumble, and at 200 Hz it thins every bass part audibly. A steeper filter
+  lower down removes what is below music and leaves the bass. Both are settings
+  (`highPassHz`, `highPassOrder`), so the owner's can be heard against it.
+- **A rider with two views of one meter.** The last 5 minutes set the level
+  (target -23 LUFS, +6/-12 dB, 0.25 dB/s either way). The last 30 seconds may
+  only cut: when they read more than 3 LU above the 5 minutes, the gain comes
+  down at up to 2 dB/s, and goes back up at the slow rate. Lifting quickly on a
+  short view is pumping (*The first real mix*, `docs/COMPLETED.md`); cutting
+  quickly protects ears from someone who has just turned up. A player's first
+  minute moves at 1 dB/s, so a newcomer arrives at level. Silence is gated out
+  of both views, so a player who rests is neither lifted nor cut.
+- **A soft limit, then a hard one,** 14 and 18 dB above the channel target: a
+  fast peak compressor, then a 2 ms lookahead limiter. They catch one player's
+  spike before the sum's limiter has to turn the whole band down for it.
+- **Placement.** A small spread, so a room of mono players is not one point in
+  the middle: +/-5 % for two players, growing quickly then slowly to +/-21 %
+  at fifteen, where they are 3 % apart; beyond fifteen the width stays and they
+  close up. Players are placed by order of arrival, dealt from the outside in
+  (first far left, second far right, third inside the first...), so a new player
+  moves everyone a little and nobody a lot, gliding at 2 % a second. The spread
+  is added to the player's own pan, for every player. **Nothing is decided from
+  what a player sends** (mono or stereo, how wide, how bassy): a player can
+  change any of that mid-jam, and a decision made on it would be stuck wrong. A
+  21 % offset on a stereo source is a gentle balance shift, and on a bass part a
+  barely noticeable one.
+- **Unmasking (experimental, off by default).** Four wide bands (120 Hz, 400 Hz,
+  1.5 kHz, 5 kHz). Over about 8 seconds, each band gets an owner: the player
+  with the largest share of it (a new owner needs half again the old one's
+  share, so it does not flip). Another player with a real share of that band
+  dips there, by up to 2 dB at an even split, moving at 0.2 dB per second; a
+  player's own home band (where most of their energy is) is never dipped. **What
+  keeps it from sounding like sidechain ducking** is the time scale: it follows
+  who occupies a band over seconds, never the notes, so nothing moves with the
+  rhythm.
+
+**The sum:**
+- **The room.** A short (0.5 s), dark (damped above 2.5 kHz, fed only 250 Hz to
+  4 kHz) feedback-delay room, mixed in at -16 dB, which over the archived jams
+  measures about 22-25 dB under the dry sum: to put players recorded in
+  different places into one space, not to be heard as reverb.
+- **The master rider,** the same two views, slower: 0.1 dB/s, cutting at most
+  1 dB/s, +10/-12 dB, aiming at -13 LUFS before the glue, which takes about
+  1 dB more: out near -14 LUFS. (+6 was too little:
+  the summed band sits well under the sum of its targets, and at +6 the master
+  sat on its cap and the jams came out near -16 LUFS.)
+- **A slow tilt.** The sum's balance of energy below and above 700 Hz, over
+  about 30 s, against the usual balance of the archived jams through this chain
+  (§9.4); half the difference, at most +/-1.5 dB, moving at most 0.02 dB/s. It
+  corrects an evening that is all low end or all fizz, slowly enough not to be
+  heard moving.
+- **Glue:** 2:1 above -18 dBFS RMS, 6 dB knee, 30 ms attack, 300 ms release
+  (faster once below the knee), the bass kept out of its detector (80 Hz
+  sidechain high-pass) so the bass line does not pump the band.
+- **A soft limit** (8:1 on peaks above -4 dBFS, 1 ms attack) and **the brick
+  wall** (5 ms lookahead, -1.5 dBFS sample peak, leaving room for the encoder's
+  overshoot).
+
+**Cost:** measured, not estimated; §8 and `docs/COMPLETED.md`.
+
+**The compressor and the tilt** are chalkwalk-dsp's (`Compressor.h`,
+`TiltEq.h`), written again from the owner's seq_play (lockstep) effects rather
+than moved: those are JUCE effects, and the review for the move found the bus
+compressor detected on the left side only and its knee boosted just below the
+threshold. The owner holds that code's copyright, so moving it was open; a
+rewrite was smaller than the port.
+
 **Delivery:** Opus over a WebSocket, decoded and played with Web Audio
 (WebCodecs `AudioDecoder` where present; a small wasm Opus decoder otherwise).
 Under two seconds of extra delay (`PRINCIPLES §4`), and the meter frames ride the same socket. The
@@ -364,6 +441,11 @@ worklet plays that sample position (`PRINCIPLES §4`).
   -1 dBFS sample peak).
 - Per-interval silence (a player who sent nothing) is silence, not a held
   level.
+- The mastered chain's values are in §6.1. Its tilt aims at a low/high balance
+  (energy below and above 700 Hz, one-pole split) of **5.2 dB**: the median of
+  the 12 archived jams (2024-07 to 2025-08) through the chain with the tilt off,
+  which ranged from 2.9 to 9.0 dB over a whole jam and from -2.6 to 9.8 dB over
+  their last 30 seconds.
 
 ### 9.5 Chat and moderation values
 
