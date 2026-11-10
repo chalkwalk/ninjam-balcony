@@ -60,8 +60,9 @@ that jam, not estimated. **(draft)**
 - **A2. A listener can impersonate a player, or flood the room's chat.** Every listener
   line carries the bot's name; every listener is rate-limited; the room's admins can
   silence one listener or all of them.
-- **A3. Chat about "that solo" lands long after the band moved on.** Extra delay over about
-  a second, beyond the interval every participant already hears, is a defect.
+- **A3. Chat about "that solo" lands long after the band moved on.** Extra delay of two
+  seconds or more, beyond the interval every participant already hears, is a defect
+  (`PRINCIPLES §4`).
 - **A4. An unannounced audience.** Someone at work hears a jam the players did not know was
   being heard. The bot says what it is, and who is listening.
 - **A5. An open relay.** The bot never connects anywhere a web visitor asks it to; the

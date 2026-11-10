@@ -46,7 +46,7 @@ waiting at 5:58 in on time).
 asked to choose another, **my call**), then:
 
 - **Sound:** one stereo stream of the session, about one interval behind the
-  band (as every Ninjam participant hears every other) plus under a second.
+  band (as every Ninjam participant hears every other) plus under two seconds.
   The page says so in a line, so nobody thinks it is broken.
 - **The room:** players, each with their channels and a real level meter, sent
   with the audio so they move with what is heard. Meters are hidden from
@@ -124,7 +124,7 @@ encodes once, so the cost per listener is one stream however many play.
 
 **Delivery:** Opus over a WebSocket, decoded and played with Web Audio
 (WebCodecs `AudioDecoder` where present; a small wasm Opus decoder otherwise).
-Under a second of extra delay, and the meter frames ride the same socket. The
+Under two seconds of extra delay (`PRINCIPLES §4`), and the meter frames ride the same socket. The
 original sketch's lean towards a plain `<audio>` element is withdrawn: it costs
 seconds of delay and loses the meters' timing.
 

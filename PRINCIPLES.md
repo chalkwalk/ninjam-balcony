@@ -34,9 +34,9 @@ changed first, deliberately (see above). The principle named owns the test.
 3. **Cost** (§3). Clears: CPU and memory spent per listener are constant and small (a
    socket and its buffers); decode, mix and encode happen once for all. Fails: any
    per-listener decode, mix, encode or loudness work.
-4. **Delay** (§4). Clears: the listener hears the band at most one interval plus one
-   second behind, and the meters move with the audio they describe. Fails: a second or
-   more of added delay, or meters that lead or lag the sound.
+4. **Delay** (§4). Clears: the listener hears the band at most one interval plus two
+   seconds behind, and the meters move with the audio they describe. Fails: two seconds
+   or more of added delay, or meters that lead or lag the sound.
 5. **Evidence** (§5). Clears: every claim about loudness, CPU, memory or bandwidth comes
    with a measured number, the method, and the load when it was taken; an unmeasured
    figure is labelled an estimate. Fails: a number from intuition presented as fact, or a
@@ -87,8 +87,15 @@ and nothing else, so fifty listeners cost the CPU of one.
 ## §4 The interval is the delay; everything else is budget
 
 A listener hears the band one interval late, as every participant hears every other. Beyond
-that the balcony may add under a second, and the meters ride with the sound so they move
+that the balcony may add under two seconds, and the meters ride with the sound so they move
 with what is heard (`GOALS A3`).
+
+The budget is set against the interval, not against zero. A typical interval (16 beats at
+120 bpm) is 8 s, so chat about the music already lands an interval plus a few seconds after
+it was played; what the budget protects is a listener's comment still making sense to the
+players, which rules out a deep, stable buffer of tens of seconds, not a jitter buffer of a
+second or two. *(Changed from under one second by the owner, 2026-11-09, with this
+reasoning.)*
 
 ## §5 Measure; do not guess
 
