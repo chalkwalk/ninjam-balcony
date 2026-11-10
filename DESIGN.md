@@ -236,10 +236,12 @@ Searched 2026-11-09 (`docs/COMPLETED.md`, *Prior art*). Nothing open does what
 - **ninjamcast**, in the reference Ninjam source (`ninjam/ninjamcast`): a bot
   that joins a room and feeds an MP3 mix to a SHOUTcast server. The ancestor of
   the "public streams" some rooms ran. Listen-only, seconds of delay, no chat,
-  no meters, no loudness matching, and on WDL (GPLv2). It is the minimal
-  version of this project: `ninjamcast` plus Icecast plus an `<audio>` element
-  would be a listen-only balcony in an afternoon, and is the fallback if this
-  one is ever abandoned.
+  no meters, no loudness matching, and built on `NJClient` and WDL (GPLv2): the
+  dependency pile a small, clean `chalkwalk-ninjam` exists to avoid. It is
+  read for the size and shape of the job (how little a listening bot needs,
+  what it reconnects and when) and **nothing is taken from it**: no code, no
+  structure copied line for line, as with every reference Ninjam source
+  (`chalkwalk-ninjam` README, *Provenance*).
 - **NinjamZap** (an iOS client with a hosted service) advertises live web streams
   and web chat that "reaches the room". Its open core (GPLv2) is the client;
   how the web side works, and whether it serves rooms outside its own hosting,

@@ -46,6 +46,10 @@ Order for new work: **PRINCIPLES -> GOALS -> DESIGN -> ROADMAP -> HANDOFF**.
   measured offline against an archived jam; prefer that to a live room.
 - Changes to the shared libraries go to `chalkwalk-ninjam` / `chalkwalk-dsp`, not to a
   local copy (`PRINCIPLES §9`). Our libraries are C++17 and MIT.
+- **The reference Ninjam sources are read, never copied.** `NJClient`, WDL, ReaNinjam and
+  `ninjamcast` may tell you the size and shape of a job; no code comes from them, verbatim
+  or paraphrased line by line. `chalkwalk-ninjam` exists because that code is a dependency
+  pile, and its README's *Provenance* is the rule.
 - **A piece jambot should also have is built in jambot**, with clean edges and its own
   tests, and used from here through the submodule; the socket client is the first
   (`DESIGN §7`). Read `../chalkwalk-jambot/README.md` and `src/BotClient.h` before
