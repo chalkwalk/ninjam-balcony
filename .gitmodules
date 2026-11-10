@@ -1,0 +1,9 @@
+[submodule "libs/ninjam"]
+	path = libs/ninjam
+	url = https://github.com/chalkwalk/chalkwalk-ninjam.git
+[submodule "libs/dsp"]
+	path = libs/dsp
+	url = https://github.com/chalkwalk/chalkwalk-dsp.git
+[submodule "libs/jambot"]
+	path = libs/jambot
+	url = https://github.com/chalkwalk/chalkwalk-jambot.git

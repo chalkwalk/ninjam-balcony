@@ -55,6 +55,24 @@ Order for new work: **PRINCIPLES -> GOALS -> DESIGN -> ROADMAP -> HANDOFF**.
   (`DESIGN §7`). Read `../chalkwalk-jambot/README.md` and `src/BotClient.h` before
   writing anything that talks to the room.
 
+## Canonical commands
+
+```sh
+git submodule update --init --recursive
+cmake -B build                       # build-$USER/ if someone else's build/ is there
+cmake --build build -j4              # -j2 and `nice` when machine-load says BUSY
+ctest --test-dir build --output-on-failure
+
+# Quick: skip the libraries' own suites (the full run is what "verified" means)
+cmake -B build -DBALCONY_LIBRARY_TESTS=OFF
+
+# A library change on a local branch, before it is pushed and the submodule bumped
+cmake -B build -DCHALKWALK_DSP_DIR=/home/programming/chalkwalk-dsp-balcony
+```
+
+`work/` (untracked) holds local test material: copies of real session archives, which are
+never committed, published or uploaded, and renders made from them.
+
 ## Documentation maintenance
 
 `PRINCIPLES.md`, `GOALS.md` and `DESIGN.md` are cited by number from the other docs and
