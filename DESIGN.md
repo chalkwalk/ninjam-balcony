@@ -32,6 +32,10 @@ and anti-goals that follow from this are in `GOALS.md`.
 
 ## 2. What the listener gets
 
+**The URL is public** (owner, 2026-11-09): anyone who finds it may listen and
+chat while a jam runs. **When no jam is running it is one page of static
+content** and nothing else -- no chat, no names, nothing that talks to the bot.
+
 **Room closed.** A static page: no jam right now; the next one is <date and
 time in the visitor's own time zone>, computed in the page (first Wednesday of
 the month, 18:00 America/Los_Angeles) so it never needs editing and rolls over
@@ -56,6 +60,9 @@ asked to choose another, **my call**), then:
   who else is listening. Chat is an ARIA live region; player joins and leaves
   are announced.
 - **Controls:** volume and mute, the listener's own. Nothing else.
+- **Phones:** listening in the foreground is enough (owner, 2026-11-09). Mobile
+  browsers suspend Web Audio when the screen locks; the page says so on phones,
+  and resumes when brought back.
 
 ## 3. What the room gets
 
@@ -66,9 +73,16 @@ asked to choose another, **my call**), then:
   so nobody can pass as a player. A `!vote` typed on the web arrives as
   `<listeners> <Alice> !vote bpm 110`, which the server reads as chat, never as
   a vote.
-- **Arrivals and departures** are said in chat: `Alice is listening`,
-  `Alice left`. A drop and reconnect within a few seconds is not announced
-  twice **(my call)**.
+- **Arrivals and departures** are said in chat, **batched: at most one line per
+  interval** (owner, 2026-11-09), naming everyone who came and went in it, with
+  the count: `Alice and Bob joined the balcony, Carol left (7 listening)`. A drop
+  and reconnect within the same interval cancels out **(my call)**.
+- **Any player can send the balcony away**, in words (owner, 2026-11-09; the
+  jambots' rule, `JAMBOT §8`). The bot tells its listeners the room asked it to
+  leave, closes their streams, says goodbye in the room and exits; it does not
+  come back until the room is next opened. The phrasing it recognises comes
+  from jambot's addressing and language (`BotAddress`, `BotLanguage`), so
+  `balcony, leave` and the ways people actually say it both work.
 
 ## 4. Votes: the bot never changes an outcome
 
@@ -89,6 +103,9 @@ channels or not. So:
   copy of it.
 
 ## 5. Moderation
+
+Sending the whole balcony away is any player's (§3). The rest is for the
+room's admins:
 
 - **Automatic:** per-listener rate limit (a few lines per interval) and a length
   cap on lines.

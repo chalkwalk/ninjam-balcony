@@ -70,8 +70,10 @@ changed first, deliberately (see above). The principle named owns the test.
 ## §1 The room is the host; the balcony is a guest
 
 The bot takes one user slot, sends no audio, says what it is on joining, and announces who is
-listening. A vote's outcome is identical to the bot's absence (`DESIGN §4`). The room's own
-admins can quiet or remove listeners from inside the room, with the client they already use.
+listening. A vote's outcome is identical to the bot's absence (`DESIGN §4`). Any player can send
+the balcony away, in words, and it stays gone until the room next opens; the room's admins
+can quiet or remove single listeners. Both from inside the room, with the client they
+already use.
 
 ## §2 Interoperate; do not extend
 
