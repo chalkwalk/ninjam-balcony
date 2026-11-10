@@ -1,0 +1,30 @@
+# /etc/caddy/Caddyfile on the VM (DESIGN §7, §7.1).
+#
+# Always on. The page is static and always answers; the WebSocket and the
+# status go to the bot, and when the bot is not running (the room is closed)
+# status answers "closed" here, so the page never depends on the bot.
+ninjam.chalkwalkmusic.com {
+	encode gzip
+
+	handle /ws {
+		reverse_proxy 127.0.0.1:8080
+	}
+	handle /status {
+		reverse_proxy 127.0.0.1:8080
+	}
+	handle {
+		root * /opt/balcony/web
+		file_server
+		header /player-worklet.js Cache-Control "no-cache"
+	}
+
+	# The bot is down: the room is closed.
+	handle_errors {
+		@status path /status
+		handle @status {
+			header Content-Type application/json
+			header Cache-Control no-store
+			respond `{"open":false}` 200
+		}
+	}
+}

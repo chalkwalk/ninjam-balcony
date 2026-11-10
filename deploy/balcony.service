@@ -1,0 +1,33 @@
+[Unit]
+Description=ninjam-balcony: the improv room's web listener (DESIGN §7.1)
+# Up and down with the room, so `ninjam-room open|close` needs no change:
+# WantedBy starts it when ninjam.service starts; PartOf stops it when the room
+# stops, and After= makes systemd stop it FIRST, so it can tell its listeners
+# the jam has ended while the server is still there.
+PartOf=ninjam.service
+After=ninjam.service network.target
+
+[Service]
+# The server takes a moment to listen after it starts. Wait for it (up to 30 s)
+# rather than retry inside the bot: the bot connects once and never again.
+ExecStartPre=/bin/bash -c 'for i in $(seq 30); do (exec 3<>/dev/tcp/127.0.0.1/2049) 2>/dev/null && exit 0; sleep 1; done; exit 1'
+ExecStart=/opt/balcony/bin/balcony --server 127.0.0.1:2049 --user balcony --hidden \
+    --url https://ninjam.chalkwalkmusic.com/ --admins ${BALCONY_ADMINS} \
+    --listen 127.0.0.1:8080
+# BALCONY_PASSWORD and BALCONY_ADMINS, root-only (0600).
+EnvironmentFile=/etc/ninjam/balcony.env
+# Sent away, kicked, or the server gone: stay gone until the room is next
+# opened (DESIGN §7.1, no reconnecting).
+Restart=no
+DynamicUser=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+MemoryMax=512M
+TimeoutStopSec=10
+
+[Install]
+WantedBy=ninjam.service
