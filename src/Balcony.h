@@ -44,6 +44,9 @@ public:
     // Whether /status says open from the start. Replay is open at once; the
     // live room only once the bot is in it (DESIGN §7.1), via `setOpen`.
     bool openAtStart = true;
+    // Listen-only (DESIGN §5): web chat off from the start; admins can still
+    // turn it on with "balcony, chat on".
+    bool quietAtStart = false;
   };
 
   // One channel of the room as the client sees it, for the live picture: the

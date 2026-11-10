@@ -37,6 +37,7 @@ Balcony::Balcony(Config c)
       mixer_(cfg_.mixer),
       opus_(cfg_.bitrate) {
   open_ = cfg_.openAtStart;
+  quiet_ = cfg_.quietAtStart;
   if (!cfg_.staticRoot.empty())
     server_.setStaticRoot(cfg_.staticRoot);
 }
@@ -231,6 +232,8 @@ void Balcony::onText(int id, const std::string &text) {
       first = false;
     }
     server_.sendText(id, h + "]}");
+    if (quiet_)
+      server_.sendText(id, "{\"t\":\"notice\",\"text\":\"Web chat is off for now. You can still listen.\"}");
     for (int other : welcomed_)
       sendRoom(other);
     return;

@@ -12,6 +12,9 @@
 // --vote-threshold tells it the server's SetVotingThreshold, so it can back a
 // vote exactly when the humans alone would have carried it (DESIGN §4).
 //
+// --listen-only starts with web chat off (DESIGN §5); an admin's "balcony,
+// chat on" turns it on.
+//
 // --replay plays a session archive as if it were the room (DESIGN §9.7):
 // everything from the mix to the page, with no server.
 //
@@ -43,7 +46,7 @@ void onSignal(int) { g_stop = true; }
 void usage(const char *argv0) {
   std::fprintf(stderr,
                "%s %s\nusage: %s --server <host:port> [--user NAME] [--url URL] "
-               "[--admins a,b] [--hidden | --vote-threshold PCT] [--listen host:port] [--page dir]\n"
+               "[--admins a,b] [--hidden | --vote-threshold PCT] [--listen-only] [--listen host:port] [--page dir]\n"
                "       %s --replay <archive dir> [--loop] [--listen host:port] [--page dir]\n",
                kBotName, version(), argv0, argv0);
 }
@@ -60,7 +63,7 @@ bool splitHostPort(const std::string &s, std::string &host, int &port) {
 
 int main(int argc, char **argv) {
   std::string replay, server, user, url, admins, page, threshold, listen = "127.0.0.1:8080";
-  bool loop = false, hidden = false;
+  bool loop = false, hidden = false, listenOnly = false;
   for (int i = 1; i < argc; ++i) {
     auto arg = [&](const char *f, std::string &v) {
       if (std::strcmp(argv[i], f) == 0 && i + 1 < argc) {
@@ -75,6 +78,10 @@ int main(int argc, char **argv) {
       continue;
     if (std::strcmp(argv[i], "--loop") == 0) {
       loop = true;
+      continue;
+    }
+    if (std::strcmp(argv[i], "--listen-only") == 0) {
+      listenOnly = true;
       continue;
     }
     if (std::strcmp(argv[i], "--hidden") == 0) {
@@ -96,6 +103,7 @@ int main(int argc, char **argv) {
   }
   cfg.staticRoot = page;
   cfg.openAtStart = !replay.empty();
+  cfg.quietAtStart = listenOnly;
 
   // The room's client, when there is a room. Chat to the room goes through it.
   BotClient::SocketClient client;

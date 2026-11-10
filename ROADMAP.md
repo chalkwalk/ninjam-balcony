@@ -39,7 +39,6 @@ named, not numbered, and carry checkboxes.
 
 ## Later
 
-- [ ] **Listen-only mode**: a jam with web chat off from the start (`DESIGN §5`).
 - [ ] **Publish**: GitHub, probably GPLv3, when the owner decides. `LICENSE`,
       `THIRDPARTY.md`, `CONTRIBUTING.md`, and a check that no document names a private
       project.

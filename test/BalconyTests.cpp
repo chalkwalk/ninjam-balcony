@@ -38,9 +38,10 @@ struct Running {
   std::unique_ptr<Balcony> b;
   std::thread loop, feed;
 
-  Running() {
+  explicit Running(bool quiet = false) {
     Balcony::Config c;
     c.port = 0;
+    c.quietAtStart = quiet;
     c.toRoom = [this](const std::string &s) {
       std::lock_guard<std::mutex> g(m);
       toRoom.push_back(s);
@@ -161,4 +162,48 @@ TEST_CASE("names are refused politely, and the room hears listeners as the bot",
   for (int i = 0; i < 300 && !r.roomHeard("joined the balcony"); ++i)
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   CHECK(r.roomHeard("Alice and Bob joined the balcony (2 listening)"));
+}
+
+namespace {
+bool recvUntil(Client &c, const std::string &needle) {
+  for (int i = 0; i < 80; ++i)
+    if (c.recvText().find(needle) != std::string::npos)
+      return true;
+  return false;
+}
+}  // namespace
+
+TEST_CASE("listen-only starts with chat off; an admin turns it on", "[balcony]") {
+  Running r(true);
+  Client a;
+  REQUIRE(a.open(r.b->port()));
+  a.sendText(R"({"t":"hello","name":"Alice"})");
+  CHECK(recvUntil(a, "Web chat is off"));
+  a.sendText(R"({"t":"say","text":"hello?"})");
+  CHECK(recvUntil(a, "paused web chat"));
+  r.b->setQuiet(false);
+  CHECK(recvUntil(a, "turned web chat back on"));
+  a.sendText(R"({"t":"say","text":"now?"})");
+  for (int i = 0; i < 100 && !r.roomHeard("<Alice> now?"); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  CHECK(r.roomHeard("<Alice> now?"));
+  CHECK_FALSE(r.roomHeard("hello?"));
+}
+
+TEST_CASE("an admin's kick closes that listener's stream and says so", "[balcony]") {
+  Running r;
+  Client a;
+  REQUIRE(a.open(r.b->port()));
+  a.sendText(R"({"t":"hello","name":"Alice"})");
+  CHECK(recvUntil(a, "welcome"));
+  r.b->kick("alice");
+  CHECK(recvUntil(a, "\"why\":\"kicked\""));
+  for (int i = 0; i < 100 && !r.roomHeard("removed from the balcony"); ++i)
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  CHECK(r.roomHeard("removed from the balcony"));
+  // The name stays blocked for the session.
+  Client again;
+  REQUIRE(again.open(r.b->port()));
+  again.sendText(R"({"t":"hello","name":"Alice"})");
+  CHECK(recvUntil(again, "\"why\":\"blocked\""));
 }
