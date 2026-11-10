@@ -216,10 +216,10 @@ open. So the page and its status never depend on the bot running:
   no retry, by jambot's rule: a bot that reconnects is a bot nobody can get rid
   of. If the bot is kicked, or its connection drops, it tells its listeners and
   exits; only `ninjam-room open` (or a person restarting the unit) brings it
-  back. A dropped connection mid-jam therefore ends the balcony for that jam
-  unless someone restarts it **(my call;** the alternative, an automatic rejoin
-  after a drop but never after a kick, needs the bot to tell the two apart, and
-  the server does not say).
+  back. The risk is low (owner, 2026-11-09): the bot and the server
+  share a machine and talk over loopback, so a network drop between them does
+  not happen; what ends the connection is the server stopping or the room
+  sending the bot away, and in both cases it should stay gone.
 - **Tear-down:** `ninjam-room close` stops the bot first, so it can tell its
   listeners the jam has ended and close their sockets cleanly, then the server
   **(my call)**. If the server goes first (a crash, or closed by hand), the bot
