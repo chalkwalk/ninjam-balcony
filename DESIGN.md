@@ -319,12 +319,18 @@ worklet plays that sample position (`PRINCIPLES §4`).
 
 ### 9.4 The sound's starting values
 
-- Window: 60 s of 400 ms blocks every 100 ms, gated as BS.1770 (absolute
+- Window: 120 s of 400 ms blocks every 100 ms, gated as BS.1770 (absolute
   -70 LUFS, relative -10 LU) -- the integrated measurement, over a moving window.
 - A channel is not ridden until it has 10 s of ungated blocks in the window;
   until then its gain is 0 dB.
-- Target per channel: -23 LUFS. Gain clamped to -12..+12 dB, slewed at most
-  1 dB per second, smoothed per sample so a step never clicks.
+- Target per channel: -23 LUFS. Cut at most 12 dB, boost at most 9 dB, and no
+  boost at all when the window reads below -50 LUFS (more likely noise or bleed
+  than playing). Slewed at most 0.5 dB per second, ramped per sample so a step
+  never clicks.
+- *(Tuned 2026-11-10 against a real 113-minute, four-player jam: the first
+  values, a 60 s window at 1 dB/s with +/-12 dB, swung a channel 12 dB in
+  12 s and lifted near-silent channels the full 12 dB. Both renders are kept
+  for listening; `docs/COMPLETED.md`, *The first real mix*.)*
 - Master: the sum's own sliding loudness rides it toward -16 LUFS by the same
   rules, then a lookahead peak limiter (5 ms lookahead, 50 ms release, ceiling
   -1 dBFS sample peak).

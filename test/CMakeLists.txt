@@ -7,6 +7,7 @@ if(NOT TARGET Catch2::Catch2WithMain)
 endif()
 
 add_executable(balcony_tests
+    MixerTests.cpp
     VersionTests.cpp)
 target_link_libraries(balcony_tests PRIVATE balcony_core Catch2::Catch2WithMain)
 target_compile_definitions(balcony_tests

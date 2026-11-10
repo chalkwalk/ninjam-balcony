@@ -24,3 +24,35 @@ Sources: <https://github.com/justinfrankel/ninjam> (and the local copy in
 <https://www.ninjamzap.com/>, <https://github.com/jacinside/ninjamzap-core>,
 <https://library.vcvrack.com/akaudio/Ninjam>, <https://github.com/BHSPitMonkey/ninjam-js>,
 <https://github.com/bill-auger/webjam>, <https://ninbot.com/>.
+
+## The first real mix (2026-11-10)
+
+`balcony-render` over the 2025-04-02 improv archive (four players, 113 minutes, 698
+intervals at 100 bpm / 16; clips at 88.2 kHz, resampled to 48 kHz), on this machine under
+load (load average about 12, other agents running), through the mixer at the 60 ms block
+size the bot will use.
+
+| | First values (A) | Gentler (B, now the default) |
+|---|---|---|
+| Window, slew | 60 s, 1 dB/s | 120 s, 0.5 dB/s |
+| Gain range | +/-12 dB | -12..+9 dB, no boost below -50 LUFS |
+| Mix integrated | -15.9 LUFS | -15.9 LUFS |
+| Mix peak | -1.00 dBFS | -1.00 dBFS |
+| Decode + resample | 4.6 % of one core | 3.6 % |
+| Mix (rider, pan, sum, limiter) | 0.7 % | 0.6 % |
+
+- **The targets hold**: -16 LUFS within 0.1, and the limiter's ceiling is never passed.
+- **The cost is the decode and the resampling**, about 0.9-1.2 % of a core per channel on
+  this x86 under load; the mix itself is under 1 % for the whole room. A 32-channel room
+  would be roughly a third of one core here; the VM's Arm cores are to be measured.
+- **What the trace showed**: real channels sit anywhere from -14 to -44 LUFS over a
+  minute, and swing by 20 dB as players rest and return. At 1 dB/s the rider followed
+  those swings within seconds, which is pumping by another name; at 0.5 dB/s over 120 s it
+  follows the evening instead of the phrase.
+- **Open**: at about 32 minutes the whole band went quiet together (every channel near
+  -40 LUFS) and both variants lifted it: every channel to its boost cap, and the master
+  about +9 dB on top. Whether a quiet passage of the whole band should stay quiet is a
+  question for the owner (the period's Questions).
+
+Renders, local only: `work/render-2025-04-02-A-fast.wav`, `work/render-2025-04-02-B-gentle.wav`
+(48 kHz float stereo); trace of B in `work/render-B.log`.

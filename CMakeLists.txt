@@ -24,6 +24,8 @@ pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
 
 # Everything but main(), so the tests link the same code the bot runs.
 add_library(balcony_core STATIC
+    src/Archive.cpp
+    src/Mixer.cpp
     src/Version.cpp)
 target_include_directories(balcony_core PUBLIC src)
 target_link_libraries(balcony_core
@@ -32,8 +34,13 @@ if(NOT MSVC)
     target_compile_options(balcony_core PRIVATE -Wall -Wextra -Wpedantic -Wshadow)
 endif()
 
+target_link_libraries(balcony_core PUBLIC chalkwalk::dsp::measure)
+
 add_executable(balcony src/main.cpp)
 target_link_libraries(balcony PRIVATE balcony_core)
+
+add_executable(balcony-render tools/render.cpp)
+target_link_libraries(balcony-render PRIVATE balcony_core)
 
 # Our own switch, not BUILD_TESTING: chalkwalk-ninjam forces that OFF in the
 # cache so xiph's projects do not register their tests.
