@@ -19,6 +19,7 @@ Chrome (`google-chrome --headless=new --remote-debugging-port=9333
 | `drive.mjs` | join, sound buffered, meters moving, chat echoed |
 | `drive-retry.mjs` | the bot killed and restarted: the page rejoins (env `KILL_BOT`, `START_BOT`: shell commands) |
 | `drive-closed.mjs` | no bot, the page served statically on `:18081`: the closed view, the next jam in London time, the `.ics` |
+| `drive-a11y.mjs` | the accessibility tree in the join and listening views: every control named, headings, one live log, no meters exposed |
 | `drive-live.mjs` | with `--server`: two listeners through the live scene below |
 
 Firefox (`firefox --headless --profile <dir> --remote-debugging-port 9334

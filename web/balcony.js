@@ -113,7 +113,10 @@
   }
 
   function showStartSound() {
+    const wasHidden = $('start-sound').hidden;
     $('start-sound').hidden = !ctx || ctx.state === 'running' || ctx.state === 'closed';
+    if (wasHidden && !$('start-sound').hidden)
+      line('notice', '', 'Your browser is holding the sound back. Press "Start sound" to hear the band.');
   }
   $('start-sound').addEventListener('click', () => {
     if (ctx) ctx.resume().then(showStartSound, () => {});
@@ -384,7 +387,8 @@
     const b = $('mute');
     const on = b.getAttribute('aria-pressed') !== 'true';
     b.setAttribute('aria-pressed', String(on));
-    b.textContent = on ? 'Unmute' : 'Mute';
+    // The name stays "Mute"; aria-pressed says whether it is on. Changing both
+    // would make a screen reader announce "Unmute, pressed".
     setVolume();
   });
 

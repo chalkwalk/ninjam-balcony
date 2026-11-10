@@ -25,7 +25,9 @@ named, not numbered, and carry checkboxes.
       audio device here, so playback itself is unheard; check it with ears. Safari and
       phones: untested (WebCodecs audio is recent in Safari); a wasm Opus fallback if
       one lacks it.
-- [ ] **Screen-reader pass** (`PRINCIPLES §8`).
+- [ ] **Screen-reader pass** (`PRINCIPLES §8`) with a real reader (Orca, VoiceOver,
+      NVDA). The accessibility tree is checked by `test/browser/drive-a11y.mjs`: every
+      control named, headings in order, the chat a live log, no meter nodes.
 - [ ] **A dress rehearsal** with two or three people before the first public jam.
 - [ ] **Measure a real jam** (CPU, memory, network; `ninjam-room metrics`) and replace
       the estimates in `DESIGN §8` (`PRINCIPLES §5`).

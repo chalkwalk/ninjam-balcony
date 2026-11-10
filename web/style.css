@@ -1,3 +1,5 @@
+/* The hidden attribute wins over any display rule below (a styled button is inline-block). */
+[hidden] { display: none !important; }
 :root {
   --bg: #f7f5f0; --fg: #1d1b18; --muted: #6b665d; --line: #d9d3c7;
   --accent: #2d6a4f; --accent-fg: #ffffff; --error: #a4161a;
@@ -19,7 +21,7 @@ body { margin: 0; background: var(--bg); color: var(--fg);
 main { max-width: 60rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
 h1 { font-size: 1.6rem; margin: 0; }
 h2 { font-size: 1.3rem; margin: 1.5rem 0 .5rem; }
-h3 { font-size: 1rem; margin: 1rem 0 .4rem; color: var(--muted); text-transform: uppercase;
+h3 { font-size: 1rem; margin: 1rem 0 .4rem; color: var(--muted); font-variant-caps: all-small-caps;
   letter-spacing: .04em; }
 .tagline, .quiet { color: var(--muted); }
 .error { color: var(--error); }
@@ -30,6 +32,7 @@ a { color: var(--accent); }
   text-decoration: none; cursor: pointer; }
 .button + .button { margin-left: .5rem; }
 #mute[aria-pressed="true"] { background: transparent; color: var(--accent); }
+#mute[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent); }
 input { font: inherit; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .4rem;
   background: var(--panel); color: var(--fg); min-width: 0; }
 .row { display: flex; gap: .5rem; align-items: center; }
