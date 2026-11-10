@@ -16,17 +16,18 @@ float toDb(double linear) {
 
 Mixer::Mixer(const MixerConfig &config) : cfg_(config) {
   master_.meter = std::make_unique<chalkwalk::dsp::measure::SlidingLoudness>(
-      2, cfg_.sampleRate, cfg_.windowSeconds);
+      2, cfg_.sampleRate,
+      cfg_.masterWindowSeconds > 0 ? cfg_.masterWindowSeconds : cfg_.windowSeconds);
   limiter_.prepare(cfg_.sampleRate, cfg_.limiterLookaheadMs,
                    cfg_.limiterReleaseMs, cfg_.limiterCeilingDb);
 }
 
-std::pair<double, double> Mixer::ride(Rider &r, double targetLufs, int n) {
+std::pair<double, double> Mixer::ride(Rider &r, double targetLufs, double maxBoostDb, int n) {
   const double before = r.gainDb;
   double target = before;
   if (r.meter->gatedSeconds() >= cfg_.minGatedSeconds) {
     const double lufs = r.meter->lufs();
-    const double boost = lufs < cfg_.boostFloorLufs ? 0.0 : cfg_.maxBoostDb;
+    const double boost = lufs < cfg_.boostFloorLufs ? 0.0 : maxBoostDb;
     target = std::clamp(targetLufs - lufs, -cfg_.maxCutDb, boost);
   }
   const double step = cfg_.slewDbPerSecond * n / cfg_.sampleRate;
@@ -54,7 +55,7 @@ void Mixer::process(const std::vector<ChannelInput> &inputs, int n, float *outL,
     Rider &rider = it->second;
     // Measured before the gain, so the rider is not chasing its own output.
     rider.meter->add(in.left, in.right != nullptr ? in.right : in.left, n);
-    const auto [g0, g1] = ride(rider, cfg_.channelTargetLufs, n);
+    const auto [g0, g1] = ride(rider, cfg_.channelTargetLufs, cfg_.maxBoostDb, n);
 
     ChannelMeter m;
     m.key = *in.key;
@@ -80,7 +81,9 @@ void Mixer::process(const std::vector<ChannelInput> &inputs, int n, float *outL,
 
   // The sum: measured, ridden toward the listening level, then limited.
   master_.meter->add(outL, outR, n);
-  const auto [m0, m1] = ride(master_, cfg_.masterTargetLufs, n);
+  const auto [m0, m1] = ride(master_, cfg_.masterTargetLufs,
+                             cfg_.masterMaxBoostDb >= 0 ? cfg_.masterMaxBoostDb : cfg_.maxBoostDb,
+                             n);
   for (int i = 0; i < n; ++i) {
     const double g = m0 + (m1 - m0) * (double)(i + 1) / n;
     outL[i] = (float)(outL[i] * g);

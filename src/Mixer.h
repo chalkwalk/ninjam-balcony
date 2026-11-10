@@ -34,6 +34,12 @@ struct MixerConfig {
   double boostFloorLufs = -50.0;
   double slewDbPerSecond = 0.5;
   double masterTargetLufs = -16.0;
+  // The master's own window and boost cap; 0 and below mean "as the channels".
+  // A long window and a small cap let the whole band's dynamics through (a
+  // quiet passage stays quiet) while the channels are still evened out:
+  // option (b) of the period's question Q1, for listening, not yet a default.
+  double masterWindowSeconds = 0.0;
+  double masterMaxBoostDb = -1.0;
   double limiterLookaheadMs = 5.0;
   double limiterReleaseMs = 50.0;
   double limiterCeilingDb = -1.0;
@@ -79,7 +85,7 @@ private:
 
   // Move a rider's gain toward its target by at most the slew for `n`
   // samples; returns the linear gains at the start and end of the block.
-  std::pair<double, double> ride(Rider &r, double targetLufs, int n);
+  std::pair<double, double> ride(Rider &r, double targetLufs, double maxBoostDb, int n);
 
   MixerConfig cfg_;
   std::map<ChannelKey, Rider> channels_;

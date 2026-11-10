@@ -3,6 +3,7 @@
 //   balcony-render <archive dir> <out.wav> [--seconds N] [--trace]
 //                  [--window S] [--slew DBPS] [--max-boost DB] [--max-cut DB]
 //                  [--boost-floor LUFS] [--target LUFS]
+//                  [--master-window S] [--master-max-boost DB]
 //
 // The archive may be one *.ninjam directory or a directory of them. Prints,
 // per channel, its measured loudness and the gain the rider ended on, then the
@@ -49,6 +50,8 @@ int main(int argc, char **argv) {
     num("--max-cut", cfg.maxCutDb);
     num("--boost-floor", cfg.boostFloorLufs);
     num("--target", cfg.channelTargetLufs);
+    num("--master-window", cfg.masterWindowSeconds);
+    num("--master-max-boost", cfg.masterMaxBoostDb);
   }
   double nextTrace = 0.0;
 
