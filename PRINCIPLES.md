@@ -21,22 +21,53 @@ balcony is a guest.
 
 ## The gate
 
-Before a proposal reaches `DESIGN.md`, it answers each of these, and the principle named owns
-the test:
+Before a proposal reaches `DESIGN.md`, it goes through each rung. A rung **clears** when the
+proposal meets the test stated; anything short of it is a **fail**, and "well, except..."
+is a fail. A fail means the proposal changes until it clears, or the principle named is
+changed first, deliberately (see above). The principle named owns the test.
 
-1. **Guest** -- does the room behave exactly as it would without the bot? (§1)
-2. **Protocol** -- does it work with a stock `ninjamsrv` and every stock client? (§2)
-3. **Cost** -- does a new listener cost bytes, or CPU? (§3)
-4. **Delay** -- what does it add to the time between the band and the listener? (§4)
-5. **Evidence** -- what is the number, and how was it measured? (§5)
-6. **Names** -- can anyone now speak as someone they are not, or vote? (§6)
-7. **Memory** -- does it keep anything about a listener after they leave? (§7)
-8. **Reader** -- is every control named, every arrival and line announced, and the meters
-   silent to a screen reader? (§8)
-9. **One home** -- does every rule it needs (protocol, votes, loudness) have exactly one? (§9)
-10. **Page** -- does the page stay plain HTML and JavaScript? (§10)
-11. **Footprint** -- does it fit beside `ninjamsrv` on the free VM? (§11)
-12. **Goals** -- does it clear `GOALS.md`, the anti-goals above all?
+1. **Guest** (§1). Clears: with the bot in the room, every player sees the same votes'
+   outcomes, the same tempo and interval, and the same audio as without it; the bot holds
+   one user slot and transmits no audio. Fails: anything a player could notice beyond the
+   bot's own chat lines and its one entry in the user list.
+2. **Protocol** (§2). Clears: works against an unmodified `ninjamsrv` and is seen correctly
+   by unmodified clients. Fails: needs a server patch, a server setting other than the
+   bot's own account, or a client that understands something new.
+3. **Cost** (§3). Clears: CPU and memory spent per listener are constant and small (a
+   socket and its buffers); decode, mix and encode happen once for all. Fails: any
+   per-listener decode, mix, encode or loudness work.
+4. **Delay** (§4). Clears: the listener hears the band at most one interval plus one
+   second behind, and the meters move with the audio they describe. Fails: a second or
+   more of added delay, or meters that lead or lag the sound.
+5. **Evidence** (§5). Clears: every claim about loudness, CPU, memory or bandwidth comes
+   with a measured number, the method, and the load when it was taken; an unmeasured
+   figure is labelled an estimate. Fails: a number from intuition presented as fact, or a
+   loudness judged by ear.
+6. **Names** (§6). Clears: every line a listener causes in the room carries the bot's
+   name, a listener's `!vote` reaches the server as chat, and admin commands are taken only
+   from listed logged-in users. Fails: any path by which a listener's text arrives under
+   another name, counts as a vote, or acts as an admin.
+7. **Memory** (§7). Clears: when a listener leaves, nothing about them stays except chat
+   history held in memory for the running session. Fails: anything written to disk, logged
+   with names or addresses, or kept across sessions.
+8. **Reader** (§8). Clears: every new control has an accessible name, every new arrival,
+   departure or chat line is announced, nothing that changes many times a second (meters)
+   is exposed to assistive technology, and it has been tried with a screen reader. Fails:
+   any one of those missing.
+9. **One home** (§9). Clears: protocol, vote arithmetic and loudness come from
+   `chalkwalk-ninjam` and `chalkwalk-dsp`, and a missing piece is added there. Fails: a
+   local copy or reimplementation of something a library already has, or a library fix
+   patched locally.
+10. **Page** (§10). Clears: the page is HTML, CSS and JavaScript served as written, plus
+    the one wasm decoder. Fails: a framework, a bundler or build step for the page, or a
+    runtime dependency fetched from a third-party CDN. **(draft)**
+11. **Footprint** (§11). Clears: measured (or, before the VM, estimated per §5) to fit in
+    the VM beside `ninjamsrv` with a full room, and it degrades before the server is
+    starved. Fails: a cost that grows with listeners beyond bandwidth, or anything that can
+    take CPU the server needs.
+12. **Goals**. Clears: serves a goal in `GOALS.md` and touches no non-goal or anti-goal.
+    Fails: touches an anti-goal, however it is framed; touching a non-goal needs the
+    owner's decision first.
 
 ## §1 The room is the host; the balcony is a guest
 

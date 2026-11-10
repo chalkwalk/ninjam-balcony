@@ -10,10 +10,11 @@ Designed, not built. No code yet.
   numbered on 11-09; no decision changed).
 - `PRINCIPLES.md` and `GOALS.md` are **drafts**, lifted from that design on 11-09 and not
   yet accepted by the owner. Items marked **(draft)** go beyond what was agreed.
-- The repository is local only (no remote yet).
+- The repository is local only (no remote yet). It goes to GitHub when the owner decides
+  it is ready, probably under GPLv3; the licence is decided then.
 
 ## Next
 
 1. The owner reads and accepts or changes `PRINCIPLES.md` and `GOALS.md`.
-2. Prior art, licence and visibility (`ROADMAP.md`, *Before building*).
+2. Prior art (`ROADMAP.md`, *Before building*).
 3. The skeleton, then mixing an archived jam offline.

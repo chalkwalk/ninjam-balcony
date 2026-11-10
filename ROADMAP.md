@@ -17,9 +17,11 @@ named, not numbered, and carry checkboxes. Anything left open in `DESIGN §9` is
       stream); the NINJAM forum; BHSPitMonkey/ninjam-js (a JS client needing Electron or a
       Chrome App for raw TCP). Groups that stream today seem to use OBS. If a good one
       exists, contribute to it instead.
-- [ ] **Licence and visibility.** Private on the Pi first, GitHub later? The libraries it
-      stands on are MIT; libopus and libebur128 are BSD and MIT. Decides `LICENSE`,
-      `THIRDPARTY.md` and whether these docs may name private projects.
+- [ ] **Publish, when it is ready.** Local until the owner decides it is ready, then
+      GitHub, probably under GPLv3 (decided then, not now). The libraries it stands on
+      (`chalkwalk-*` MIT, libopus BSD, libebur128 MIT) are all GPLv3-compatible. Brings
+      `LICENSE`, `THIRDPARTY.md`, `CONTRIBUTING.md`, and a check that no document names a
+      private project.
 - [ ] **Decide what `DESIGN §9` leaves open**, starting with the WebSocket and Opus
       libraries and the wire format between bot and page.
 
