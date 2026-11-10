@@ -47,6 +47,10 @@ target_link_libraries(balcony PRIVATE balcony_core)
 add_executable(balcony-render tools/render.cpp)
 target_link_libraries(balcony-render PRIVATE balcony_core)
 
+# A stand-in player for tests against a local ninjamsrv (never a public room).
+add_executable(balcony-fake-player tools/fake-player.cpp)
+target_link_libraries(balcony-fake-player PRIVATE chalkwalk::jambot)
+
 # Our own switch, not BUILD_TESTING: chalkwalk-ninjam forces that OFF in the
 # cache so xiph's projects do not register their tests.
 option(BALCONY_TESTS "Build the balcony's tests" ON)
