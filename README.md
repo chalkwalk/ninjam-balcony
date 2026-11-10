@@ -5,7 +5,9 @@ with the link can hear the jam in a browser and talk to the band, with nothing
 to install. Seats in the balcony: you listen and you can call out, but you
 don't play.
 
-**Status: designed, not built.** Nothing here runs yet.
+**Status: working locally, not yet deployed.** It joins a room, streams it to
+the page and carries chat both ways, tested against a local `ninjamsrv`; it
+has not yet run beside the real room.
 
 ## What it will do
 
@@ -18,8 +20,10 @@ don't play.
 - **Talk to the band.** Your lines reach the room's chat as
   `<balcony> <you> ...`; theirs reach you. The players see who is listening.
 - **The players decide.** Any player can leave themselves out of the stream
-  (`balcony, leave me out`) or send the balcony away for the rest of the jam
-  (`balcony, leave`).
+  (`balcony, leave me out`, and `balcony, put me back`) or send the balcony
+  away for the rest of the jam (`balcony, leave`). Everyone who arrives is told
+  the balcony is there. The room's admins can remove a listener (`balcony, kick
+  <name>`) or pause web chat (`balcony, quiet`, `balcony, chat on`).
 - **Nothing else.** No account, no install, no mixing, no recording. Listeners
   don't play or vote, and the bot never changes how the room's votes come out.
 

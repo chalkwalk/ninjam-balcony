@@ -163,7 +163,7 @@
   requestAnimationFrame(drawMeters);
 
   // ---- The conversation ----------------------------------------------------
-  let socket = null, me = null, players = new Map(), endedBy = null;
+  let socket = null, me = null, players = new Map(), endedBy = null, roomSeen = false;
 
   function line(kind, from, text) {
     const li = document.createElement('li');
@@ -219,10 +219,12 @@
       }
       ul.append(li);
     }
-    if (before.size || me) {
+    // Who was already playing is in the list; only later changes are news.
+    if (roomSeen) {
       for (const n of players.keys()) if (!before.has(n)) line('system', '', `${n} is playing`);
       for (const n of before) if (!players.has(n)) line('system', '', `${n} has left the room`);
     }
+    roomSeen = true;
     const lu = $('listeners');
     lu.textContent = '';
     for (const n of msg.listeners) {
@@ -317,6 +319,7 @@
       $('unsupported').hidden = false;
     }
     endedBy = null;
+    roomSeen = false;
     $('log').textContent = '';
     connect(name);
   });

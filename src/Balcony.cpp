@@ -36,6 +36,7 @@ Balcony::Balcony(Config c)
           [this](int id) { onClose(id); }}),
       mixer_(cfg_.mixer),
       opus_(cfg_.bitrate) {
+  open_ = cfg_.openAtStart;
   if (!cfg_.staticRoot.empty())
     server_.setStaticRoot(cfg_.staticRoot);
 }
@@ -70,6 +71,73 @@ void Balcony::roomChat(const std::string &from, const std::string &text) {
   inboxChat_.emplace_back(from, text);
 }
 
+void Balcony::setTempo(int bpm, int bpi) {
+  std::lock_guard<std::mutex> g(inboxMutex_);
+  inbox_.bpm = bpm;
+  inbox_.bpi = bpi;
+}
+
+void Balcony::setRoster(std::vector<RosterChannel> roster) {
+  std::lock_guard<std::mutex> g(inboxMutex_);
+  roster_ = std::move(roster);
+  rosterPending_ = true;
+}
+
+void Balcony::post(std::function<void()> f) {
+  std::lock_guard<std::mutex> g(inboxMutex_);
+  inboxDo_.push_back(std::move(f));
+}
+
+void Balcony::kick(const std::string &name) {
+  post([this, name] {
+    const int id = listeners_.kick(name);
+    if (id < 0) {
+      if (cfg_.toRoom)
+        cfg_.toRoom("nobody called " + name + " is in the balcony");
+      return;
+    }
+    server_.sendText(id, "{\"t\":\"closing\",\"why\":\"kicked\"}");
+    server_.close(id, 1008, "removed by the room");
+    if (cfg_.toRoom)
+      cfg_.toRoom(name + " was removed from the balcony for this jam");
+  });
+}
+
+void Balcony::setQuiet(bool quiet) {
+  post([this, quiet] {
+    if (quiet == quiet_)
+      return;
+    quiet_ = quiet;
+    const std::string text = quiet ? "The room has paused web chat. You can still listen."
+                                   : "The room has turned web chat back on.";
+    for (int id : welcomed_)
+      server_.sendText(id, "{\"t\":\"notice\",\"text\":" + json::quote(text) + "}");
+    if (cfg_.toRoom)
+      cfg_.toRoom(quiet ? "web chat paused" : "web chat back on");
+  });
+}
+
+void Balcony::applyRoster(const std::vector<RosterChannel> &roster) {
+  live_ = true;
+  std::map<ChannelKey, Player> next;
+  for (const auto &rc : roster) {
+    auto id = ids_.find(rc.key);
+    if (id == ids_.end())
+      id = ids_.emplace(rc.key, nextChannelId_++).first;
+    Player p;
+    p.id = id->second;
+    p.key = rc.key;
+    p.channelName = rc.name;
+    p.inStream = rc.inStream;
+    p.pan = rc.pan;
+    p.lastInterval = intervalIndex_;
+    next.emplace(rc.key, p);
+  }
+  players_.swap(next);
+  for (int id : welcomed_)
+    sendRoom(id);
+}
+
 std::set<std::string> Balcony::playerNames() const {
   std::set<std::string> s;
   for (const auto &kv : players_)
@@ -78,6 +146,8 @@ std::set<std::string> Balcony::playerNames() const {
 }
 
 std::string Balcony::status() const {
+  if (!open_)
+    return "{\"open\":false}";
   return "{\"open\":true,\"bpm\":" + std::to_string(bpm_) + ",\"bpi\":" +
          std::to_string(bpi_) + ",\"players\":" + std::to_string(playerNames().size()) +
          ",\"listeners\":" + std::to_string(listeners_.size()) + "}";
@@ -166,6 +236,10 @@ void Balcony::onText(int id, const std::string &text) {
     return;
   }
 
+  if (t == "say" && welcomed_.count(id) && quiet_) {
+    server_.sendText(id, "{\"t\":\"notice\",\"text\":\"The room has paused web chat.\"}");
+    return;
+  }
   if (t == "say" && welcomed_.count(id)) {
     std::string cleaned, why;
     if (!listeners_.say(id, m["text"], Clock::now(), cleaned, why)) {
@@ -183,10 +257,23 @@ void Balcony::onText(int id, const std::string &text) {
 
 void Balcony::takeInbox() {
   std::vector<std::pair<std::string, std::string>> chat;
+  std::vector<std::function<void()>> todo;
+  std::vector<RosterChannel> roster;
+  bool newRoster = false;
   {
     std::lock_guard<std::mutex> g(inboxMutex_);
     chat.swap(inboxChat_);
+    todo.swap(inboxDo_);
+    if (rosterPending_) {
+      roster = roster_;
+      newRoster = true;
+      rosterPending_ = false;
+    }
   }
+  if (newRoster)
+    applyRoster(roster);
+  for (auto &f : todo)
+    f();
   for (auto &c : chat)
     chatToListeners({displayName(c.first), c.second, "player", unixNow()});
 }
@@ -212,6 +299,8 @@ void Balcony::boundary() {
   pos_ = 0;
 
   for (const auto &kv : current_.channels) {
+    if (live_)
+      break;  // the room says who is here, not the audio
     auto it = players_.find(kv.first);
     if (it == players_.end()) {
       Player p;
@@ -224,7 +313,7 @@ void Balcony::boundary() {
     it->second.lastInterval = intervalIndex_;
   }
   for (auto it = players_.begin(); it != players_.end();) {
-    if (intervalIndex_ - it->second.lastInterval > kForgetAfterIntervals) {
+    if (!live_ && intervalIndex_ - it->second.lastInterval > kForgetAfterIntervals) {
       it = players_.erase(it);
       roomChanged = true;
     } else {
@@ -253,7 +342,10 @@ void Balcony::mixSpan(float *l, float *r, int n, std::vector<ChannelMeter> &mete
     if ((int)a.left.size() < pos_ + n)
       continue;
     const auto p = players_.find(kv.first);
-    inputs.push_back({&kv.first, a.left.data() + pos_, a.right.data() + pos_, 0.0f,
+    if (live_ && p == players_.end())
+      continue;  // gone from the room: not heard from the next interval
+    inputs.push_back({&kv.first, a.left.data() + pos_, a.right.data() + pos_,
+                      p == players_.end() ? 0.0f : p->second.pan,
                       p == players_.end() || p->second.inStream});
   }
   mixer_.process(inputs, n, l, r, &meters);
@@ -320,7 +412,7 @@ void Balcony::run(const std::atomic<bool> &stop, const std::string &closingWhy) 
     takeInbox();
     if (!started_) {
       std::lock_guard<std::mutex> g(inboxMutex_);
-      started_ = !inbox_.channels.empty();
+      started_ = !inbox_.channels.empty() || clockWanted_;
       if (started_) {
         samples_ = 0;  // so the first block takes the first interval at once
         pos_ = 0;

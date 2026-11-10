@@ -12,6 +12,7 @@ add_executable(balcony_tests
     ListenersTests.cpp
     MixerTests.cpp
     OpusStreamTests.cpp
+    RoomTests.cpp
     WebServerTests.cpp
     VersionTests.cpp)
 target_link_libraries(balcony_tests PRIVATE balcony_core Catch2::Catch2WithMain)

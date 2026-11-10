@@ -110,6 +110,16 @@ channels or not. So:
 - **On any other server**, it is counted, and it applies the neutral rule with
   chalkwalk-ninjam's `Voting.h` -- the arithmetic the jambots use -- not a third
   copy of it.
+- **The rule needs the threshold to be exact** (found live, 2026-11-10). From a
+  vote line alone the bot sees only how many votes are required, which fits a
+  range of thresholds; jambot's rule then takes the largest number the humans
+  alone could have needed, so it errs toward not voting. But not voting is not
+  neutral when the bot is counted: three humans at 75 % need 2 votes, the bot's
+  presence raises that to 3, and with 2 cast the vote fails that would have
+  carried without it. So the operator gives the server's percentage
+  (`--vote-threshold`), and the bot backs exactly when the humans alone carried
+  it; without one it falls back to jambot's cautious rule. `H` avoids all of
+  this and stays preferred.
 
 ## 5. Moderation
 
@@ -120,8 +130,13 @@ room's admins:
   cap on lines.
 - **Admin commands,** honoured only from logged-in users (names without the
   `@ip` that anonymous logins carry), from a configured list:
-  `!kick <name>` drops that listener and blocks the name and connection for the
-  session; `!quiet` / `!unquiet` pause and resume all web chat.
+  `balcony, kick <name>` drops that listener and blocks the name for the
+  session; `balcony, quiet` / `balcony, chat on` pause and resume all web chat.
+  **In words, not `!` commands** (found live, 2026-11-10): the stock server
+  answers any `!` line in the room other than `!vote` and `!topic` with
+  "Unknown !command" and never relays it, so `!kick` cannot reach the bot as
+  room chat. Sent as a private message to the bot, `!kick <name>`, `!quiet`
+  and `!unquiet` work as written.
 - **Listen-only:** a setting that runs a jam with web chat off from the start;
   listening still works.
 
@@ -356,6 +371,9 @@ worklet plays that sample position (`PRINCIPLES §4`).
 - On joining: `balcony here: people are listening to this room on the web at
   <url>. Say "balcony, leave me out" to be left out of the stream, or "balcony,
   leave" to send the balcony away.`
+- **To each player who arrives later, the same line privately** (my call,
+  2026-11-10): the bot usually joins an empty room as it opens, so without it
+  nobody who came afterwards would be told (A4).
 - Batched arrivals: `Alice and Bob joined the balcony, Carol left (7
   listening)`.
 - Leaving: `balcony leaving: the stream has ended.`

@@ -28,6 +28,7 @@ add_library(balcony_core STATIC
     src/Balcony.cpp
     src/Json.cpp
     src/Listeners.cpp
+    src/Room.cpp
     src/Mixer.cpp
     src/OpusStream.cpp
     src/WebServer.cpp

@@ -1,12 +1,14 @@
 // balcony-fake-player: a stand-in player for testing against a LOCAL ninjamsrv.
 //
 //   balcony-fake-player <host> <port> <name> [--tone HZ] [--hear] [--say TEXT]
-//                       [--seconds N] [--pan P]
+//                       [--seconds N] [--at SECONDS TEXT]... [--login]
 //
 // Joins anonymously; with --tone it publishes one channel and sends a tone
 // every interval; with --hear it subscribes to everyone and prints each
 // interval it receives (who, channel, samples, RMS); --say sends one line
-// after joining. Prints the room's chat. Never point it at a public room.
+// after joining; --at says TEXT that many seconds after starting (repeatable);
+// --login logs in as <name> with BALCONY_TEST_PASSWORD instead of anonymously.
+// Prints the room's chat. Never point it at a public room.
 
 #include "SocketClient.h"
 
@@ -79,7 +81,8 @@ int main(int argc, char **argv) {
   std::signal(SIGTERM, onSignal);
   BotClient::SocketClient client;
   Player p(client);
-  bool hear = false;
+  bool hear = false, login = false;
+  std::vector<std::pair<double, std::string>> script;
   double seconds = 0;
   for (int i = 4; i < argc; ++i) {
     const std::string a = argv[i];
@@ -87,13 +90,21 @@ int main(int argc, char **argv) {
     else if (a == "--hear") hear = true;
     else if (a == "--say" && i + 1 < argc) p.say = argv[++i];
     else if (a == "--seconds" && i + 1 < argc) seconds = std::atof(argv[++i]);
+    else if (a == "--at" && i + 2 < argc) {
+      script.emplace_back(std::atof(argv[i + 1]), argv[i + 2]);
+      i += 2;
+    } else if (a == "--login") login = true;
   }
   const double rate = 48000;
   client.addListener(&p);
   client.setSampleRate(rate);
   client.setChannels(p.hz > 0 ? std::vector<std::string>{"tone"} : std::vector<std::string>{});
   client.setDefaultRecvEnabled(hear);
-  client.connect(argv[1], std::atoi(argv[2]), std::string("anonymous:") + argv[3], "");
+  const char *pw = std::getenv("BALCONY_TEST_PASSWORD");
+  if (login)
+    client.connect(argv[1], std::atoi(argv[2]), argv[3], pw ? pw : "");
+  else
+    client.connect(argv[1], std::atoi(argv[2]), std::string("anonymous:") + argv[3], "");
 
   // Send one interval of tone per interval, on our own clock: a stand-in, not
   // a client, so it does not care about the grid's phase.
@@ -105,6 +116,12 @@ int main(int argc, char **argv) {
     const auto now = std::chrono::steady_clock::now();
     if (seconds > 0 && now - start > std::chrono::duration<double>(seconds))
       break;
+    for (auto &line : script)
+      if (!line.second.empty() && client.isConnected() &&
+          now - start >= std::chrono::duration<double>(line.first)) {
+        client.sendChat(line.second);
+        line.second.clear();
+      }
     if (p.hz <= 0 || !client.isConnected() || p.bpm <= 0 || now < next)
       continue;
     const double len = 60.0 * p.bpi / p.bpm;
