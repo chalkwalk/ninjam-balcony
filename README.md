@@ -16,7 +16,10 @@ don't play.
   interval behind them (as every Ninjam player hears every other), with each
   player's level meters moving with the sound.
 - **Talk to the band.** Your lines reach the room's chat as
-  `<listeners> <you> ...`; theirs reach you. The players see who is listening.
+  `<balcony> <you> ...`; theirs reach you. The players see who is listening.
+- **The players decide.** Any player can leave themselves out of the stream
+  (`balcony, leave me out`) or send the balcony away for the rest of the jam
+  (`balcony, leave`).
 - **Nothing else.** No account, no install, no mixing, no recording. Listeners
   don't play or vote, and the bot never changes how the room's votes come out.
 

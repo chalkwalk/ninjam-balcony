@@ -8,8 +8,10 @@ Designed, not built. No code yet.
 
 - `DESIGN.md` is the design agreed with the owner on 2026-11-08 (moved to the root and
   numbered on 11-09; no decision changed).
-- `PRINCIPLES.md` accepted by the owner on 11-09. `GOALS.md` is still a **draft**; items
-  marked **(draft)** go beyond what was agreed.
+- `PRINCIPLES.md` and `GOALS.md` accepted by the owner on 11-09, after a round of questions:
+  a public URL that is one static page between jams; the bot named `balcony`; any player
+  can send it away or leave themselves out; arrivals batched per interval, listener chat
+  immediate; phones in the foreground only; the delay budget two seconds (`PRINCIPLES §4`).
 - Prior art searched 11-09: nothing to contribute to instead (`DESIGN §10`,
   `docs/COMPLETED.md`).
 - chalkwalk-jambot is the framework; the socket client and volume/pan on `BotClient` are to
@@ -19,6 +21,6 @@ Designed, not built. No code yet.
 
 ## Next
 
-1. The owner's answers to the open questions, then `GOALS.md` accepted.
+1. Decide what `DESIGN §9` leaves open (WebSocket and Opus libraries, wire format).
 2. The skeleton, then mixing an archived jam offline.
-3. The socket client in jambot.
+3. In jambot: the socket client, volume and pan on `BotClient`, the balcony's phrases.

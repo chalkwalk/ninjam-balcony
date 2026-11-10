@@ -10,8 +10,6 @@ named, not numbered, and carry checkboxes. Anything left open in `DESIGN §9` is
 
 ## Before building
 
-- [ ] **The owner accepts `GOALS.md`**, or changes it. (`PRINCIPLES.md` accepted
-      2026-11-09; prior art done, `docs/COMPLETED.md`.)
 - [ ] **Publish, when it is ready.** Local until the owner decides it is ready, then
       GitHub, probably under GPLv3 (decided then, not now). The libraries it stands on
       (`chalkwalk-*` MIT, libopus BSD, libebur128 MIT) are all GPLv3-compatible. Brings
@@ -43,6 +41,10 @@ jambot with its own tests before the balcony uses it.
       chat, membership. The item jambot's README already lists as "Not yet done". Tested
       against a local `ninjamsrv`.
 - [ ] **Volume and pan on `BotClient::Channel`**, as the player set them.
+- [ ] **The balcony's requests in jambot's corpus**: "leave", "leave me out", "put me
+      back", addressed to `balcony`, added to `test/fixtures/` first and watched go red,
+      as jambot's README asks. Whether these are jambot's own requests (a band can be
+      sent away too) or a balcony vocabulary on jambot's parser is decided there.
 - [ ] **Take jambot as a submodule** here (`libs/jambot`), beside `chalkwalk-ninjam` and
       `chalkwalk-dsp`.
 
@@ -56,6 +58,9 @@ jambot with its own tests before the balcony uses it.
 - [ ] **WebSocket out**: audio and meter frames on one socket; status endpoint.
 - [ ] **Chat both ways**: prefixing, arrivals and departures, history on arrival,
       rate limit and length cap (`DESIGN §3`, `§5`).
+- [ ] **Players' say**: `balcony, leave` (the whole balcony, until the room next opens) and
+      `balcony, leave me out` / `put me back` (one player's channels), in the ways people
+      say them (`DESIGN §3`).
 - [ ] **Admin commands**: `!kick`, `!quiet`, `!unquiet`; listen-only mode.
 
 ## The page

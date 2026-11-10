@@ -68,15 +68,24 @@ asked to choose another, **my call**), then:
 
 - The bot joins as one user, sends no audio, and says on joining what it is and
   that people are listening on the web **(etiquette, from the original sketch)**.
-- **Listener chat is prefixed by the bot:** the players see
-  `<listeners> <Alice> nice groove!`. Every listener line carries the bot's name,
+- **The bot is `balcony`** in the user list and in chat (owner, 2026-11-09).
+- **Listener chat is prefixed by the bot**, and sent as soon as it is typed,
+  within the rate limit (§5); only arrivals and departures are batched: the players see
+  `<balcony> <Alice> nice groove!`. Every listener line carries the bot's name,
   so nobody can pass as a player. A `!vote` typed on the web arrives as
-  `<listeners> <Alice> !vote bpm 110`, which the server reads as chat, never as
+  `<balcony> <Alice> !vote bpm 110`, which the server reads as chat, never as
   a vote.
 - **Arrivals and departures** are said in chat, **batched: at most one line per
   interval** (owner, 2026-11-09), naming everyone who came and went in it, with
   the count: `Alice and Bob joined the balcony, Carol left (7 listening)`. A drop
   and reconnect within the same interval cancels out **(my call)**.
+- **Any player can leave themselves out of the stream** (owner, 2026-11-09):
+  `balcony, leave me out`, and the ways people say it. The mix drops their
+  channels from the next interval; the page shows them as present but not in
+  the stream, with no meter; the bot confirms in the room. It lasts until they
+  say `balcony, put me back` (or similar) or leave the room. Their chat still
+  reaches listeners -- the room's conversation is not theirs alone to withhold.
+  **(my call** on chat, and on the opt-out ending when they leave.)
 - **Any player can send the balcony away**, in words (owner, 2026-11-09; the
   jambots' rule, `JAMBOT §8`). The bot tells its listeners the room asked it to
   leave, closes their streams, says goodbye in the room and exits; it does not
