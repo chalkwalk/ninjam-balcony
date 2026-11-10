@@ -7,9 +7,13 @@ if(NOT TARGET Catch2::Catch2WithMain)
 endif()
 
 add_executable(balcony_tests
+    JsonTests.cpp
     MixerTests.cpp
+    OpusStreamTests.cpp
+    WebServerTests.cpp
     VersionTests.cpp)
 target_link_libraries(balcony_tests PRIVATE balcony_core Catch2::Catch2WithMain)
+target_include_directories(balcony_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(balcony_tests
     PRIVATE BALCONY_WORK_DIR="${PROJECT_SOURCE_DIR}/work")
 add_test(NAME balcony COMMAND balcony_tests)

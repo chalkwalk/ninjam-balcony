@@ -25,7 +25,10 @@ pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
 # Everything but main(), so the tests link the same code the bot runs.
 add_library(balcony_core STATIC
     src/Archive.cpp
+    src/Json.cpp
     src/Mixer.cpp
+    src/OpusStream.cpp
+    src/WebServer.cpp
     src/Version.cpp)
 target_include_directories(balcony_core PUBLIC src)
 target_link_libraries(balcony_core
