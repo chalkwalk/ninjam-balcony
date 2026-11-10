@@ -24,9 +24,14 @@ on 11-09/10 (log and open questions in `.autonomy/PLAN.md`, untracked; summary i
 - Decisions made alone and open to reversal are D1-D13 in `.autonomy/PLAN.md`; the
   ones that change the design are in `DESIGN §4`, `§5`, `§9.6`.
 
+- **A second, mixed-and-mastered chain** (DESIGN §6.1) is built and measured, off by
+  default; the owner is listening to it on blindweb (`mastered-chain`). It supersedes
+  Q1 (the owner found both Q1 options acceptable and asked for this instead).
+
 ## Next
 
-1. The owner's questions: Q1 (the rider and quiet passages), Q2 (the bot's account and
-   admins on the improv server).
+1. The owner's verdict on the mastered chain (and unmasking); then make it the default
+   or not, and give the bot the switch. Q2 in the period plan (the bot's account and
+   admins on the improv server) is still open.
 2. Merge the three library branches; bump the submodules.
 3. Listen to it; other browsers; then `deploy/README.md`.

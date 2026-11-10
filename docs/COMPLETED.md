@@ -111,3 +111,37 @@ Each verified as stated; the commits carry the detail.
   `--vote-threshold` (`DESIGN §4`); (4) a disconnect dropped the goodbye.
 - **Deploy kit** in `deploy/`: the unit (attached to `ninjam.service`, so
   `ninjam-room` is unchanged), Caddy, the steps. Not deployed.
+
+## The mixed-and-mastered chain, built and measured (2026-11-10)
+
+Built at the owner's ask (DESIGN §6.1), as a second chain beside the first so the two
+can be compared blind. The library half (compressor, tilt, one-pole split, small room,
+a meter with two windows) is on chalkwalk-dsp's `balcony` branch.
+
+**Calibrated over all 12 archived jams** (2024-07 to 2025-08, tilt off): the usual
+low/high balance about 700 Hz is 5.2 dB (median; 2.9 to 9.0). At a +6 dB master
+boost cap the master sat on its cap and the jams came out near -16 LUFS; the cap is
++10 and the master aims at -13 before the glue.
+
+**The 2025-06-04 jam, first 130 minutes** (four players; after about 146 minutes the
+room is empty and the server archives nothing but silence), this machine, quiet:
+
+| | Current (B) | Mastered (D) | Mastered + unmasking (E) |
+|---|---|---|---|
+| Integrated | -15.9 LUFS | -14.9 LUFS | -14.9 LUFS |
+| 3 s loudness, 10th / 50th / 95th | -21.8 / -16.5 / -13.1 | -20.1 / -15.1 / -13.0 | -20.1 / -15.1 / -13.0 |
+| Spread (95th - 10th) | 8.7 LU | 7.1 LU | 7.1 LU |
+| Peak | -1.00 dBFS | -1.50 dBFS | -1.50 dBFS |
+| Mix, of one core | 0.42 % | 1.25 % | 1.55 % |
+
+- **Louder and more even**, as asked: a dB up on the whole, 1.6 LU less spread,
+  mostly by lifting the quiet tenth.
+- **The limits barely work:** the glue takes 1.3 dB on average; the soft limit more
+  than 1 dB in 0.2 % of blocks, the brick wall in none. The room sits 22 dB under
+  the dry sum.
+- **The cost is still the decode** (about 3 % of a core); the mastered mix triples
+  the mix's part to about 1.3 %, unmasking adds 0.3 %.
+- Excerpts for listening, local: blind round `mastered-chain` (four one-minute
+  moments, current vs mastered and mastered vs unmasked) and browse set
+  `ninjam-balcony-mastered` (80-88 min, all three).
+
