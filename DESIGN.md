@@ -284,7 +284,8 @@ submodule bumped.
 
 ### 9.3 The wire between bot and page
 
-One WebSocket per listener. **Text frames are JSON** for everything said;
+One WebSocket per listener. All integers little-endian; `id`s are the bot's.
+A refused `hello` leaves the socket open, so the page can offer another name. **Text frames are JSON** for everything said;
 **binary frames are audio and meters**, so the hot path never parses JSON.
 
 Page to bot (text): `{"t":"hello","name":"Alice"}` once; `{"t":"say","text":"..."}`;
@@ -297,7 +298,8 @@ Bot to page (text):
   -- the whole picture, sent on welcome and whenever it changes. A channel's
   `id` is the bot's, stable while the channel exists; meters refer to it.
 - `{"t":"chat","from":"jgorbe","text":"...","kind":"player"|"listener"|"room"|"bot","at":1731234567}`
-  -- `history` on welcome is an array of these.
+- `{"t":"history","lines":[<chat>, ...]}` once, right after `welcome`.
+- `{"t":"notice","text":"slow down: ..."}` to one listener only (a refused line).
 - `{"t":"config","bpm":110,"bpi":16}` when the room changes tempo.
 - `{"t":"closing","why":"sent-away"|"server-closed"|"kicked"}` before the bot
   closes the socket.
@@ -310,8 +312,9 @@ u8   frames (n)
 u32  sample position of the first frame (48 kHz, since the bot started)
 n x { u16 length, length bytes of Opus packet }
 u8   meters (m)
-m x { u16 channel id, u8 peak, u8 loudness }   -- 0..255 = -60..0 dBFS in
-                                                  0.25 dB steps, for the 60 ms
+m x { u16 channel id, u8 peak, u8 level }   -- 0..240 = -60..0 dBFS in
+                                               0.25 dB steps, for the 60 ms;
+                                               level is the block's rms
 ```
 
 Meters ride with the audio they describe, so the page shows each set when the

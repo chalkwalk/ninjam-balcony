@@ -7,6 +7,7 @@ if(NOT TARGET Catch2::Catch2WithMain)
 endif()
 
 add_executable(balcony_tests
+    BalconyTests.cpp
     JsonTests.cpp
     ListenersTests.cpp
     MixerTests.cpp
