@@ -2,11 +2,15 @@
 
 Rewrite *State* and *Next* when you stop. The open work is [ROADMAP.md](ROADMAP.md).
 
-## State, 2026-11-10 (evening)
+## State, 2026-11-11
 
-**Works locally; not deployed; nobody has listened yet.** Two autonomous stretches on
-11-09/10 (chalkwalk's, then mounty's; plans and logs in `.autonomy/PLAN.md`, untracked;
-summaries in `docs/COMPLETED.md`).
+**Deployed on the VM and heard once.** It starts and stops with the room
+(`ninjam-room open|close`, now in `/home/programming/tools/` for both accounts), at
+https://ninjam.chalkwalkmusic.com/; the owner heard a test player's tone and chatted
+both ways (`deploy/README.md`, which also says how to update it). Source on GitHub,
+public: `chalkwalk/ninjam-balcony` (no licence file yet). Two autonomous stretches on
+11-09/10 (plans and logs in `.autonomy/PLAN.md`, untracked; summaries in
+`docs/COMPLETED.md`).
 
 - `balcony --server host:port` joins a room and streams it; `balcony --replay <archive>`
   plays a session archive as if live. Both serve the page with `--page web/` for local
@@ -26,4 +30,6 @@ summaries in `docs/COMPLETED.md`).
 ## Next
 
 1. The rumble filter stays at 35 Hz for now (owner); judge again on real bass (ROADMAP).
-2. Listen to it; other browsers; then `deploy/README.md`.
+2. A licence file (the libraries are MIT).
+3. Listen to it on a real jam or a dress rehearsal; other browsers and phones; measure
+   with `ninjam-room metrics` (ROADMAP).

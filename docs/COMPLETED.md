@@ -116,7 +116,12 @@ Each verified as stated; the commits carry the detail.
   room got the private hint and did nothing. A bare `!quiet` in the room never reaches
   the bot, because the server answers it privately as an unknown command.
 - **Deploy kit** in `deploy/`: the unit (attached to `ninjam.service`, so
-  `ninjam-room` is unchanged), Caddy, the steps. Not deployed.
+  `ninjam-room` is unchanged), Caddy, the steps.
+- **Deployed (2026-11-11)** on the VM: built there (aarch64; the library suites pass),
+  the hidden `balcony` account, Caddy with a Let's Encrypt certificate for
+  `ninjam.chalkwalkmusic.com`, ports 80/443 in the security list and iptables. Tried
+  with the room open: the owner listened in a browser, heard a fake player's tone, and
+  chat went both ways. One player, one listener: the bot about 28 MB and 2 % of a core.
 
 ## The mixed-and-mastered chain, built and measured (2026-11-10)
 

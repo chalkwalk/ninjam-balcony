@@ -1,9 +1,28 @@
 # Deploying the balcony beside the improv room
 
-**Nothing here has been deployed.** These are the files and the steps for the
-Oracle VM `ninjam` (`/home/programming/ecosystem/docs/hosting.md`); the VM, its
-ssh key, `ninjam-room` and DNS are chalkwalk's, and every step below is theirs
-to take or to approve.
+**Deployed 2026-11-11** on the Oracle VM `ninjam`
+(`/home/programming/ecosystem/docs/hosting.md`), by these steps, and tried with the
+room open: a player's tone heard in a browser at https://ninjam.chalkwalkmusic.com/,
+chat both ways. The VM, `ninjam-room` and DNS are chalkwalk's; both accounts here
+reach the VM with their own `~/.ssh/oracle-ninjam` (`ssh ninjam-vm`), and opening or
+closing the room stays the owner's call.
+
+On the VM, each file changed has its original beside it: `improv.cfg.before-balcony`,
+`/etc/caddy/Caddyfile.default`, `/etc/iptables/rules.v4.before-balcony`. The source
+is cloned at `~ubuntu/balcony-src`.
+
+## Updating
+
+```sh
+ssh ninjam-vm
+cd ~/balcony-src && git pull --recurse-submodules && git submodule update --init --recursive
+nice cmake --build build -j2
+sudo install -m 755 build/balcony /opt/balcony/bin/balcony && sudo cp -r web/. /opt/balcony/web/
+```
+
+Install while the room is closed; the next `ninjam-room open` runs the new bot. A
+changed `deploy/balcony.service` or `Caddyfile` is copied to its place by hand
+(`systemctl daemon-reload`, `systemctl reload caddy`).
 
 | File | Goes to | What it does |
 |---|---|---|
@@ -26,14 +45,10 @@ works out the next jam by itself.
 
 ## Steps
 
-1. **Merge the library branches** (local only so far, nothing pushed):
-   `chalkwalk-ninjam`, `chalkwalk-dsp` and `chalkwalk-jambot`, branch `balcony`
-   in the `/home/programming/chalkwalk-<lib>-balcony` worktrees. Then bump the
-   balcony's submodules, so it builds without the `CHALKWALK_*_DIR` overrides.
-2. **Get the source to the VM.** The balcony has no remote yet: push it
-   somewhere (GitHub, when the licence is decided) or `rsync` the tree,
-   submodules included.
-3. **Build on the VM** (aarch64; the packages are a one-off install):
+1. **The libraries** are pushed and pinned; the balcony builds from its submodules.
+2. **The source**: `git clone --recurse-submodules
+   https://github.com/chalkwalk/ninjam-balcony.git ~/balcony-src`.
+3. **Build on the VM** (aarch64, about two minutes on 2 cores; Opus is vendored):
    ```sh
    sudo apt install build-essential cmake git
    cmake -B build -DCMAKE_BUILD_TYPE=Release -DBALCONY_TESTS=OFF
@@ -55,9 +70,7 @@ works out the next jam by itself.
    `ninjam-room metrics` afterwards for the bot's real cost (first release:
    measured, not estimated).
 
-## Not checked here
+## Measured on the first try
 
-- The Caddyfile has not been run (Caddy is not installed on the dev machine);
-  `caddy validate --config Caddyfile` on the VM is the first check.
-- `balcony.service` passes `systemd-analyze verify` apart from the binary not
-  being installed.
+One player, one listener: the bot about 28 MB resident and 2 % of a core, the VM
+95 % idle. A real jam's numbers are still to come (`ninjam-room metrics`).

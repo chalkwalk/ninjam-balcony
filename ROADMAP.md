@@ -9,10 +9,6 @@ named, not numbered, and carry checkboxes.
 
 ## Before the first jam
 
-- [ ] **The bot's account on the improv server**: a `User balcony <pw> CH` line, added at
-      deploy with the owner's go-ahead; the admin is `danielm` (`deploy/README.md`).
-- [ ] **Deploy** by `deploy/README.md`: build on the VM, Caddy, ports 80/443 in both the
-      security list and iptables, enable the unit. The owner's to do or approve.
 - [ ] **The rumble filter, again on real bass.** Blind on 2025-06-04, the owner leaned to
       6 dB/octave at 100 Hz (3 of 4) but heard little difference; kept at 12 dB/octave at
       35 Hz for now (owner). Judge again on a jam with a bass player, or live.
