@@ -122,6 +122,13 @@ Each verified as stated; the commits carry the detail.
   `ninjam.chalkwalkmusic.com`, ports 80/443 in the security list and iptables. Tried
   with the room open: the owner listened in a browser, heard a fake player's tone, and
   chat went both ways. One player, one listener: the bot about 28 MB and 2 % of a core.
+- **First rehearsal (2026-11-11)**: the owner playing (Antiphon) and four practice bots
+  sent from the dev machine with `jambot-band` (chalkwalk-jambot, branch `band-runner`),
+  two web listeners on different machines. Every channel metered in the stream; the bot
+  about 61 MB and 2 % of a core, the VM 91 % idle. **Found:** an older Antiphon joins and
+  declares its channel but sends nothing until Sync and a transport restart; the
+  balcony shows the player and streams silence. The session archive's `clipsort.log`
+  (no `user` lines) and a probe client told that apart from a balcony fault in minutes.
 
 ## The mixed-and-mastered chain, built and measured (2026-11-10)
 

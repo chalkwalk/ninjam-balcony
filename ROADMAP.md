@@ -23,7 +23,10 @@ named, not numbered, and carry checkboxes.
 - [ ] **Screen-reader pass** (`PRINCIPLES §8`) with a real reader (Orca, VoiceOver,
       NVDA). The accessibility tree is checked by `test/browser/drive-a11y.mjs`: every
       control named, headings in order, the chat a live log, no meter nodes.
-- [ ] **A dress rehearsal** with two or three people before the first public jam.
+- [ ] **A dress rehearsal** with two or three people before the first public jam. A first
+      one ran 2026-11-11: the owner playing, four practice bots (`jambot-band`, branch
+      `band-runner` in chalkwalk-jambot), two web listeners on different machines; it
+      worked. Still to do: several humans playing, a phone, Safari.
 - [ ] **Measure a real jam** (CPU, memory, network; `ninjam-room metrics`) and replace
       the estimates in `DESIGN §8` (`PRINCIPLES §5`).
 

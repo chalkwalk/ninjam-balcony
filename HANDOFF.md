@@ -8,7 +8,7 @@ Rewrite *State* and *Next* when you stop. The open work is [ROADMAP.md](ROADMAP.
 (`ninjam-room open|close`, now in `/home/programming/tools/` for both accounts), at
 https://ninjam.chalkwalkmusic.com/; the owner heard a test player's tone and chatted
 both ways (`deploy/README.md`, which also says how to update it). Source on GitHub,
-public: `chalkwalk/ninjam-balcony` (no licence file yet). Two autonomous stretches on
+public: `chalkwalk/ninjam-balcony`, MIT. Two autonomous stretches on
 11-09/10 (plans and logs in `.autonomy/PLAN.md`, untracked; summaries in
 `docs/COMPLETED.md`).
 
@@ -30,6 +30,5 @@ public: `chalkwalk/ninjam-balcony` (no licence file yet). Two autonomous stretch
 ## Next
 
 1. The rumble filter stays at 35 Hz for now (owner); judge again on real bass (ROADMAP).
-2. A licence file (the libraries are MIT).
-3. Listen to it on a real jam or a dress rehearsal; other browsers and phones; measure
+2. Listen to it on a real jam or a dress rehearsal; other browsers and phones; measure
    with `ninjam-room metrics` (ROADMAP).
