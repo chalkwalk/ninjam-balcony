@@ -15,11 +15,14 @@ named, not numbered, and carry checkboxes.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.
-- [ ] **Other browsers.** Chrome: plays, checked headless. Firefox 159: WebCodecs Opus
-      decodes the stream without error (checked headless), but headless Firefox has no
-      audio device here, so playback itself is unheard; check it with ears. Safari and
-      phones: untested (WebCodecs audio is recent in Safari); a wasm Opus fallback if
-      one lacks it.
+- [ ] **Other browsers.** Heard live 2026-11-11: desktop Chrome, desktop Firefox 159,
+      Android Chrome. Safari and iPhone: untested (WebCodecs audio is recent in Safari);
+      a wasm Opus fallback if one lacks it.
+- [ ] **Say when the browser cannot play at all.** Firefox with no PulseAudio socket
+      (pipewire-pulse off on the dev desktop) decoded every frame but its AudioContext
+      stayed `suspended` forever, even created in a click; "Start sound" did nothing. If
+      the context is still suspended a few seconds after that click, say "this browser
+      is not playing sound; check it plays sound on other sites" instead.
 - [ ] **Screen-reader pass** (`PRINCIPLES §8`) with a real reader (Orca, VoiceOver,
       NVDA). The accessibility tree is checked by `test/browser/drive-a11y.mjs`: every
       control named, headings in order, the chat a live log, no meter nodes.
