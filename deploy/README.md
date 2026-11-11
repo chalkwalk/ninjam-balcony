@@ -35,7 +35,7 @@ works out the next jam by itself.
    submodules included.
 3. **Build on the VM** (aarch64; the packages are a one-off install):
    ```sh
-   sudo apt install build-essential cmake pkg-config libopus-dev git
+   sudo apt install build-essential cmake git
    cmake -B build -DCMAKE_BUILD_TYPE=Release -DBALCONY_TESTS=OFF
    cmake --build build -j2
    sudo install -D build/balcony /opt/balcony/bin/balcony

@@ -258,7 +258,7 @@ seconds of delay and loses the meters' timing.
 - **This repository**, a peer of the Ninjam client and chalkwalk-jambot, not a
   library (named by the owner: the `chalkwalk-` prefix is for libraries).
   C++17 **(my call:** on chalkwalk-ninjam for the protocol, Vorbis and
-  `Voting.h`; chalkwalk-dsp for loudness; libopus; a small WebSocket server).
+  `Voting.h`; chalkwalk-dsp for loudness; libopus (vendored); a small WebSocket server).
   The page is plain HTML and JavaScript, no framework.
 - **The spine is chalkwalk-ninjam** (owner, 2026-11-09). It builds and parses
   messages and decodes Vorbis, and is deliberately not a client: no socket, no
@@ -376,8 +376,9 @@ submodule bumped.
 
 ### 9.2 Libraries
 
-- **Opus:** libopus (BSD), the system package (`libopus-dev`; on the VM,
-  `libopus0`), through `pkg-config`. 48 kHz stereo, 20 ms frames, 96 kbit/s VBR,
+- **Opus:** libopus (BSD), vendored as a submodule at `modules/opus`, pinned
+  to a release tag (v1.6.1) and linked statically, so the build needs nothing
+  installed (owner, 2026-11-10; it was the system package). 48 kHz stereo, 20 ms frames, 96 kbit/s VBR,
   application `AUDIO`.
 - **WebSocket and HTTP:** first-party (owner: "first party unless there is a
   strong reason"). One thread, `poll()` over non-blocking sockets, on loopback

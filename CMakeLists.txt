@@ -19,8 +19,14 @@ chalkwalk_add_library(ninjam libs/ninjam)
 chalkwalk_add_library(dsp libs/dsp)
 chalkwalk_add_library(jambot libs/jambot)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(OPUS REQUIRED IMPORTED_TARGET opus)
+# Opus, vendored (modules/opus, a release tag; owner's call on D4): the build
+# needs nothing installed. Static, float API, no tests, programs or install.
+set(OPUS_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(OPUS_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(OPUS_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
+set(OPUS_INSTALL_PKG_CONFIG_MODULE OFF CACHE BOOL "" FORCE)
+set(OPUS_INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "" FORCE)
+add_subdirectory(modules/opus EXCLUDE_FROM_ALL)
 
 # Everything but main(), so the tests link the same code the bot runs.
 add_library(balcony_core STATIC
@@ -35,7 +41,7 @@ add_library(balcony_core STATIC
     src/Version.cpp)
 target_include_directories(balcony_core PUBLIC src)
 target_link_libraries(balcony_core
-    PUBLIC chalkwalk::ninjam chalkwalk::dsp chalkwalk::jambot PkgConfig::OPUS)
+    PUBLIC chalkwalk::ninjam chalkwalk::dsp chalkwalk::jambot Opus::opus)
 if(NOT MSVC)
     target_compile_options(balcony_core PRIVATE -Wall -Wextra -Wpedantic -Wshadow)
 endif()

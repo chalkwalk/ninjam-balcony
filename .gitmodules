@@ -7,3 +7,6 @@
 [submodule "libs/jambot"]
 	path = libs/jambot
 	url = https://github.com/chalkwalk/chalkwalk-jambot.git
+[submodule "modules/opus"]
+	path = modules/opus
+	url = https://github.com/xiph/opus.git
