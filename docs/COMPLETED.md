@@ -109,6 +109,12 @@ Each verified as stated; the commits carry the detail.
   swallows unknown `!` commands, so admin commands are words (`DESIGN §5`); (3) the
   cautious vote rule can block a vote when the bot is counted, hence
   `--vote-threshold` (`DESIGN §4`); (4) a disconnect dropped the goodbye.
+- **Admin commands by private message, live (2026-11-11)**: the scene in
+  `test/browser/README.md` against a loopback `ninjamsrv`, with two web listeners.
+  `/msg balcony !quiet`, `!unquiet` and `!kick Pat` took effect: the page paused and
+  resumed chat and ended Pat's view. "balcony, quiet" and "balcony, kick Pat" in the
+  room got the private hint and did nothing. A bare `!quiet` in the room never reaches
+  the bot, because the server answers it privately as an unknown command.
 - **Deploy kit** in `deploy/`: the unit (attached to `ninjam.service`, so
   `ninjam-room` is unchanged), Caddy, the steps. Not deployed.
 

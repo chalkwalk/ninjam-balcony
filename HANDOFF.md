@@ -16,8 +16,8 @@ summaries in `docs/COMPLETED.md`).
   Opus is vendored. `cmake -B build-$(id -un)` with no overrides (`$USER` can be empty in
   an agent's shell; `id -un` is safe).
 - Tests: the full ctest passes (6 suites). The D11 change (private-only admin) is unit
-  tested, not yet run live: there is no `ninjamsrv` on the machine right now
-  (`antiphon/scripts/testserver.sh` builds one into /tmp/njbuild).
+  tested and checked live (2026-11-11) against a loopback `ninjamsrv` built by
+  `antiphon/scripts/testserver.sh` into /tmp/njbuild.
 - The owner confirmed D1-D13 (D4 and D11 changed) and answered Q2.
 - **The mix is mixed and mastered** (DESIGN §6.1), chosen blind 4 of 4. The rumble-filter
   round is scored: 100 Hz 6 dB/oct preferred 3 of 4, little difference heard;
@@ -26,5 +26,4 @@ summaries in `docs/COMPLETED.md`).
 ## Next
 
 1. The rumble filter stays at 35 Hz for now (owner); judge again on real bass (ROADMAP).
-2. A live check of the private admin commands once a `ninjamsrv` exists.
-3. Listen to it; other browsers; then `deploy/README.md`.
+2. Listen to it; other browsers; then `deploy/README.md`.
