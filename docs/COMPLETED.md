@@ -153,3 +153,19 @@ so it is inaudible at that depth rather than idle. **The mastered chain is the d
 unmasking stays off.** (The Q1 round, the master rider over a quiet passage, came out
 current 2, band dynamics 1, one tie, and is superseded by this.)
 
+
+## Decisions confirmed, and the libraries readied (2026-11-10, evening)
+
+- **The owner went through D1-D13** of the first stretch: all kept but two. **D4**: Opus
+  is vendored (`modules/opus`, v1.6.1, static), so no machine needs `libopus-dev`.
+  **D11**: admin commands are private messages only (`!kick <name>`, `!quiet`,
+  `!unquiet`); one typed in the room gets a private hint instead. Q2: the admin is
+  `danielm`, and the account's `User` line goes on the VM at deploy.
+- **jambot's `balcony` branch was rebuilt on GitHub's `main`.** It had been made on a
+  local `main` carrying four unpushed September commits; those stay local (owner).
+- **Built standalone, the jambot branch did not compile**: its pinned chalkwalk-dsp
+  predated the resampler, and inside the balcony the balcony's own dsp hid that. Bumped.
+  Its tests also used `MSG_NOSIGNAL`, which macOS lacks; jambot's CI builds macOS.
+  Lesson: a library branch is verified by building it alone, as its CI does, not only
+  from the app.
+- **Anonymous handles fixed in jambot**: `handleOf("dave@1.2.3.x")` is `dave`.

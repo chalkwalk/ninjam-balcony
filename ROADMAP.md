@@ -9,16 +9,18 @@ named, not numbered, and carry checkboxes.
 
 ## Before the first jam
 
-- [ ] **Merge the library branches.** `chalkwalk-ninjam`, `chalkwalk-dsp` and
+- [ ] **Push the library branches.** chalkwalk-dsp is merged. `chalkwalk-ninjam` and
       `chalkwalk-jambot` each have a local `balcony` branch (worktrees at
-      `/home/programming/chalkwalk-<lib>-balcony`); review, merge, push, then bump the
-      submodules here so the build needs no `CHALKWALK_*_DIR` overrides.
-- [ ] **The bot's account on the improv server**: a `User balcony <pw> CH` line, and the
-      admins' names (`deploy/README.md`).
+      `/home/programming/chalkwalk-<lib>-balcony`), reviewed, built standalone as their CI
+      does, and fast-forwards of their GitHub `main`; waiting on the owner's OK to push.
+      Then bump the submodules here (no `CHALKWALK_*_DIR` overrides) and drop the
+      `displayName` step in `Room::addressRoom`, which jambot's `handleOf` now does.
+- [ ] **The bot's account on the improv server**: a `User balcony <pw> CH` line, added at
+      deploy with the owner's go-ahead; the admin is `danielm` (`deploy/README.md`).
 - [ ] **Deploy** by `deploy/README.md`: build on the VM, Caddy, ports 80/443 in both the
       security list and iptables, enable the unit. The owner's to do or approve.
-- [ ] **The owner's rumble filter**, if wanted: their 6 dB/octave at 100 Hz against the
-      12 dB/octave at 35 Hz built (`balcony-render --hp 100 --hp-order 1`), blind.
+- [ ] **The owner's rumble filter**: their 6 dB/octave at 100 Hz against the 12 dB/octave
+      at 35 Hz built. The blind round `rumble-filter` is in blindweb, to be scored.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.
@@ -36,9 +38,6 @@ named, not numbered, and carry checkboxes.
 
 ## In chalkwalk-jambot
 
-- [ ] **Handles of anonymous humans**: `BotNames::handleOf` keeps `@ip`, so a bot cannot
-      be addressed as `name` when it joined anonymously, nor a human as theirs. The
-      balcony works around it; the fix belongs there, with a corpus line first.
 - [ ] **The balcony's phrases in jambot's corpus** ("leave me out", "put me back"), if
       they turn out to be jambot's requests too. For now they are the balcony's own
       matching (`src/Room.cpp`).
