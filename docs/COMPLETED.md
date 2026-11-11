@@ -19,8 +19,7 @@ instead? **No.** What was found, and why each is not it:
 Leads not followed: the Cockos NINJAM forum's threads were not searched one by one; a
 forum post announcing a web listener would have surfaced in the searches above, and none did.
 
-Sources: <https://github.com/justinfrankel/ninjam> (and the local copy in
-`/home/programming/ninjam_plugin/references/ninjam/ninjam/ninjamcast/`),
+Sources: <https://github.com/justinfrankel/ninjam> (its `ninjamcast/` directory),
 <https://www.ninjamzap.com/>, <https://github.com/jacinside/ninjamzap-core>,
 <https://library.vcvrack.com/akaudio/Ninjam>, <https://github.com/BHSPitMonkey/ninjam-js>,
 <https://github.com/bill-auger/webjam>, <https://ninbot.com/>.
@@ -129,6 +128,10 @@ Each verified as stated; the commits carry the detail.
   declares its channel but sends nothing until Sync and a transport restart; the
   balcony shows the player and streams silence. The session archive's `clipsort.log`
   (no `user` lines) and a probe client told that apart from a balcony fault in minutes.
+- **Published (2026-11-11)** at github.com/chalkwalk/ninjam-balcony, MIT (the owner's
+  call: small and light, like its libraries), with `THIRDPARTY.md`. Local paths and the
+  private workspace repository taken out of the public docs, except `AGENTS.md`, which
+  is the orientation for agents on the dev machine.
 - **Browsers, heard live (2026-11-11)** with the practice band in the room: desktop
   Chrome, desktop Firefox 159, Android Chrome, and an iPhone (Safari). WebCodecs Opus
   plays everywhere tried, so no wasm fallback is needed for now. **Found:** Firefox on

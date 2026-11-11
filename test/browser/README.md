@@ -33,7 +33,7 @@ not playback.
 
 `ninjamsrv-local.cfg` is a test server: port 22049, loopback only by ACL (the server
 cannot bind to one interface), voting at 75 %, and a logged-in `admin`. The binary is
-built by Antiphon's `scripts/testserver.sh`. Then, together:
+built by [Antiphon](https://github.com/chalkwalk/antiphon)'s `scripts/testserver.sh`. Then, together:
 
 ```sh
 ninjamsrv test/browser/ninjamsrv-local.cfg

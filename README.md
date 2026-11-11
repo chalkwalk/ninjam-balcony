@@ -40,4 +40,5 @@ has not yet run beside the real room.
 - [ROADMAP.md](ROADMAP.md) -- what is left to do.
 - [HANDOFF.md](HANDOFF.md) -- where things stand right now.
 
-MIT licensed ([LICENSE](LICENSE)), like the chalkwalk libraries it is built on.
+MIT licensed ([LICENSE](LICENSE)), like the chalkwalk libraries it is built on; what it
+builds in is listed in [THIRDPARTY.md](THIRDPARTY.md).

@@ -39,8 +39,5 @@ named, not numbered, and carry checkboxes.
 
 ## Later
 
-- [ ] **Publish**: GitHub, probably GPLv3, when the owner decides. `LICENSE`,
-      `THIRDPARTY.md`, `CONTRIBUTING.md`, and a check that no document names a private
-      project.
 - [ ] **A base repository**, only if the balcony ends up using jambot's client but not
       its band (`DESIGN §7`). So far jambot as a submodule fits.

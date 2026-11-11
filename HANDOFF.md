@@ -5,7 +5,7 @@ Rewrite *State* and *Next* when you stop. The open work is [ROADMAP.md](ROADMAP.
 ## State, 2026-11-11
 
 **Deployed on the VM and heard once.** It starts and stops with the room
-(`ninjam-room open|close`, now in `/home/programming/tools/` for both accounts), at
+(`ninjam-room open|close`, the owner's script, usable from both dev accounts), at
 https://ninjam.chalkwalkmusic.com/; the owner heard a test player's tone and chatted
 both ways (`deploy/README.md`, which also says how to update it). Source on GitHub,
 public: `chalkwalk/ninjam-balcony`, MIT. Two autonomous stretches on
@@ -21,7 +21,7 @@ public: `chalkwalk/ninjam-balcony`, MIT. Two autonomous stretches on
   an agent's shell; `id -un` is safe).
 - Tests: the full ctest passes (6 suites). The D11 change (private-only admin) is unit
   tested and checked live (2026-11-11) against a loopback `ninjamsrv` built by
-  `antiphon/scripts/testserver.sh` into /tmp/njbuild.
+  [Antiphon](https://github.com/chalkwalk/antiphon)'s `scripts/testserver.sh`.
 - The owner confirmed D1-D13 (D4 and D11 changed) and answered Q2.
 - **The mix is mixed and mastered** (DESIGN §6.1), chosen blind 4 of 4. The rumble-filter
   round is scored: 100 Hz 6 dB/oct preferred 3 of 4, little difference heard;

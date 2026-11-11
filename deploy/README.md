@@ -1,7 +1,7 @@
 # Deploying the balcony beside the improv room
 
 **Deployed 2026-11-11** on the Oracle VM `ninjam`
-(`/home/programming/ecosystem/docs/hosting.md`), by these steps, and tried with the
+(the maintainers' hosting notes have its ports and services), by these steps, and tried with the
 room open: a player's tone heard in a browser at https://ninjam.chalkwalkmusic.com/,
 chat both ways. The VM, `ninjam-room` and DNS are chalkwalk's; both accounts here
 reach the VM with their own `~/.ssh/oracle-ninjam` (`ssh ninjam-vm`), and opening or
