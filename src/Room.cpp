@@ -145,9 +145,9 @@ BotAddress::Room Room::addressRoom() const {
   auto add = [&room](const std::string &username, const std::string &channel) {
     BotAddress::Participant p;
     p.username = username;
-    // By the name people type: `alice`, not `alice@1.2.3.x` (jambot's
-    // handles come from bot names, which carry no address).
-    p.handle = BotNames::handleOf(displayName(username));
+    // By the name people type: `alice`, not `alice@1.2.3.x` (handleOf drops
+    // the address an anonymous login carries).
+    p.handle = BotNames::handleOf(username);
     p.channel = channel;
     p.isBot = BotNames::looksLikeBot(username);
     room.participants.push_back(p);

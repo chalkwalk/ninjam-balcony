@@ -9,12 +9,6 @@ named, not numbered, and carry checkboxes.
 
 ## Before the first jam
 
-- [ ] **Push the library branches.** chalkwalk-dsp is merged. `chalkwalk-ninjam` and
-      `chalkwalk-jambot` each have a local `balcony` branch (worktrees at
-      `/home/programming/chalkwalk-<lib>-balcony`), reviewed, built standalone as their CI
-      does, and fast-forwards of their GitHub `main`; waiting on the owner's OK to push.
-      Then bump the submodules here (no `CHALKWALK_*_DIR` overrides) and drop the
-      `displayName` step in `Room::addressRoom`, which jambot's `handleOf` now does.
 - [ ] **The bot's account on the improv server**: a `User balcony <pw> CH` line, added at
       deploy with the owner's go-ahead; the admin is `danielm` (`deploy/README.md`).
 - [ ] **Deploy** by `deploy/README.md`: build on the VM, Caddy, ports 80/443 in both the
