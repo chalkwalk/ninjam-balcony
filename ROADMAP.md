@@ -15,9 +15,6 @@ named, not numbered, and carry checkboxes.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.
-- [ ] **Other browsers.** Heard live 2026-11-11: desktop Chrome, desktop Firefox 159,
-      Android Chrome. Safari and iPhone: untested (WebCodecs audio is recent in Safari);
-      a wasm Opus fallback if one lacks it.
 - [ ] **Say when the browser cannot play at all.** Firefox with no PulseAudio socket
       (pipewire-pulse off on the dev desktop) decoded every frame but its AudioContext
       stayed `suspended` forever, even created in a click; "Start sound" did nothing. If

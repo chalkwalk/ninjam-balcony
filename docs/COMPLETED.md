@@ -129,6 +129,11 @@ Each verified as stated; the commits carry the detail.
   declares its channel but sends nothing until Sync and a transport restart; the
   balcony shows the player and streams silence. The session archive's `clipsort.log`
   (no `user` lines) and a probe client told that apart from a balcony fault in minutes.
+- **Browsers, heard live (2026-11-11)** with the practice band in the room: desktop
+  Chrome, desktop Firefox 159, Android Chrome, and an iPhone (Safari). WebCodecs Opus
+  plays everywhere tried, so no wasm fallback is needed for now. **Found:** Firefox on
+  the dev desktop played nothing on any site because `pipewire-pulse` was disabled;
+  it decoded every frame and its AudioContext never left `suspended`.
 
 ## The mixed-and-mastered chain, built and measured (2026-11-10)
 
