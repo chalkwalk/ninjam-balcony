@@ -30,5 +30,5 @@ public: `chalkwalk/ninjam-balcony`, MIT. Two autonomous stretches on
 ## Next
 
 1. The rumble filter stays at 35 Hz for now (owner); judge again on real bass (ROADMAP).
-2. Listen to it on a real jam or a dress rehearsal; other browsers and phones; measure
+2. Listen to it on a real jam (Chrome, Firefox, Android and iPhone all play); measure
    with `ninjam-room metrics` (ROADMAP).
