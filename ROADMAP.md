@@ -13,8 +13,9 @@ named, not numbered, and carry checkboxes.
       deploy with the owner's go-ahead; the admin is `danielm` (`deploy/README.md`).
 - [ ] **Deploy** by `deploy/README.md`: build on the VM, Caddy, ports 80/443 in both the
       security list and iptables, enable the unit. The owner's to do or approve.
-- [ ] **The owner's rumble filter**: their 6 dB/octave at 100 Hz against the 12 dB/octave
-      at 35 Hz built. The blind round `rumble-filter` is in blindweb, to be scored.
+- [ ] **The rumble filter, again on real bass.** Blind on 2025-06-04, the owner leaned to
+      6 dB/octave at 100 Hz (3 of 4) but heard little difference; kept at 12 dB/octave at
+      35 Hz for now (owner). Judge again on a jam with a bass player, or live.
 - [ ] **Listen to it.** Nobody has heard the stream yet: replay an archive into a real
       browser and judge the mix, the rider (`Q1` in the period plan: should a quiet
       passage of the whole band stay quiet?) and the 0.4 s buffer on a phone.

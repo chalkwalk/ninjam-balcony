@@ -20,10 +20,11 @@ summaries in `docs/COMPLETED.md`).
   (`antiphon/scripts/testserver.sh` builds one into /tmp/njbuild).
 - The owner confirmed D1-D13 (D4 and D11 changed) and answered Q2.
 - **The mix is mixed and mastered** (DESIGN §6.1), chosen blind 4 of 4. The rumble-filter
-  round is scored: 100 Hz 6 dB/oct preferred 3 of 4, with little difference heard.
+  round is scored: 100 Hz 6 dB/oct preferred 3 of 4, little difference heard;
+  35 Hz kept for now.
 
 ## Next
 
-1. The rumble filter: the owner chose 100 Hz 6 dB/oct 3 of 4, but heard little difference; decide whether to make it the default.
+1. The rumble filter stays at 35 Hz for now (owner); judge again on real bass (ROADMAP).
 2. A live check of the private admin commands once a `ninjamsrv` exists.
 3. Listen to it; other browsers; then `deploy/README.md`.
