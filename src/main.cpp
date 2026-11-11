@@ -12,8 +12,8 @@
 // --vote-threshold tells it the server's SetVotingThreshold, so it can back a
 // vote exactly when the humans alone would have carried it (DESIGN §4).
 //
-// --listen-only starts with web chat off (DESIGN §5); an admin's "balcony,
-// chat on" turns it on.
+// --listen-only starts with web chat off (DESIGN §5); an admin's `!unquiet`,
+// by private message, turns it on.
 //
 // --replay plays a session archive as if it were the room (DESIGN §9.7):
 // everything from the mix to the page, with no server.

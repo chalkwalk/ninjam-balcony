@@ -29,8 +29,8 @@ has not yet run beside the real room.
 - **The players decide.** Any player can leave themselves out of the stream
   (`balcony, leave me out`, and `balcony, put me back`) or send the balcony
   away for the rest of the jam (`balcony, leave`). Everyone who arrives is told
-  the balcony is there. The room's admins can remove a listener (`balcony, kick
-  <name>`) or pause web chat (`balcony, quiet`, `balcony, chat on`).
+  the balcony is there. The room's admins can remove a listener (`!kick <name>`)
+  or pause web chat (`!quiet`, `!unquiet`), by private message to the balcony.
 
 ## The documents
 

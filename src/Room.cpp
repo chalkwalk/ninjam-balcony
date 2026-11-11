@@ -253,9 +253,10 @@ void Room::onChatMessage(const std::string &type, const std::string &username,
   }
 }
 
-// The stock server refuses any `!` line in the room but `!vote` and `!topic`
-// ("Unknown !command") and never relays it, so in the room an admin addresses
-// the balcony in words; privately, `!kick` and the rest work as written.
+// Admin commands come by private message only (DESIGN §5; owner, 2026-11-10):
+// `!kick <name>`, `!quiet`, `!unquiet` (the `!` optional). Typed in the room,
+// where the stock server would refuse a `!` line anyway, "balcony, kick ..."
+// is not acted on; the admin is told privately how to send it.
 bool Room::adminCommand(const std::string &username, const std::string &text, bool isPrivate) {
   std::string rest = text;
   if (!isPrivate) {
@@ -276,23 +277,25 @@ bool Room::adminCommand(const std::string &username, const std::string &text, bo
   while (!r.empty() && (r.back() == ' ' || r.back() == '.'))
     r.pop_back();
   const std::string lower = plain(r);
-  if (lower.rfind(" kick ", 0) == 0 && r.size() > 5) {
+  const bool kick = lower.rfind(" kick ", 0) == 0 && r.size() > 5;
+  const bool quiet = lower == " quiet " || lower == " chat off ";
+  const bool unquiet = lower == " unquiet " || lower == " chat on ";
+  if (!kick && !quiet && !unquiet)
+    return false;
+  if (!isPrivate) {
+    client_.sendPrivate(username, "Admin commands go to me by private message: !kick <name>, "
+                                  "!quiet, !unquiet.");
+    return true;
+  }
+  if (kick) {
     std::string name = r.substr(5);
     while (!name.empty() && name[0] == ' ')
       name.erase(0, 1);
     balcony_.kick(name);
-    return true;
+  } else {
+    balcony_.setQuiet(quiet);
   }
-  if (lower == " quiet " || lower == " chat off ") {
-    balcony_.setQuiet(true);
-    return true;
-  }
-  if (lower == " unquiet " || lower == " chat on ") {
-    balcony_.setQuiet(false);
-    return true;
-  }
-  (void)username;
-  return false;
+  return true;
 }
 
 void Room::considerVote(const std::string &text) {

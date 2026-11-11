@@ -7,6 +7,7 @@
 // every interval; with --hear it subscribes to everyone and prints each
 // interval it receives (who, channel, samples, RMS); --say sends one line
 // after joining; --at says TEXT that many seconds after starting (repeatable);
+// a TEXT of "/msg <user> <words>" is sent to <user> as a private message;
 // --login logs in as <name> with BALCONY_TEST_PASSWORD instead of anonymously.
 // Prints the room's chat. Never point it at a public room.
 
@@ -119,7 +120,12 @@ int main(int argc, char **argv) {
     for (auto &line : script)
       if (!line.second.empty() && client.isConnected() &&
           now - start >= std::chrono::duration<double>(line.first)) {
-        client.sendChat(line.second);
+        const std::string &t = line.second;
+        const size_t sp = t.find(' ', 5);
+        if (t.rfind("/msg ", 0) == 0 && sp != std::string::npos)
+          client.sendPrivate(t.substr(5, sp - 5), t.substr(sp + 1));
+        else
+          client.sendChat(t);
         line.second.clear();
       }
     if (p.hz <= 0 || !client.isConnected() || p.bpm <= 0 || now < next)

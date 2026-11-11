@@ -45,7 +45,7 @@ public:
     // live room only once the bot is in it (DESIGN §7.1), via `setOpen`.
     bool openAtStart = true;
     // Listen-only (DESIGN §5): web chat off from the start; admins can still
-    // turn it on with "balcony, chat on".
+    // turn it on with `!unquiet` by private message.
     bool quietAtStart = false;
   };
 

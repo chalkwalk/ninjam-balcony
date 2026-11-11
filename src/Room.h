@@ -22,10 +22,9 @@
 //   - any player: "balcony, leave me out" / "balcony, put me back" (their own
 //     channels, until they leave the room); "balcony, leave", or a bare
 //     "leave" as every jambot takes it, sends the balcony away for the jam;
-//   - an admin (a logged-in name on the list): "balcony, kick <listener>",
-//     "balcony, quiet" / "balcony, chat on" in the room, or `!kick <listener>`,
-//     `!quiet`, `!unquiet` in a private message (the server refuses unknown
-//     `!` lines in the room).
+//   - an admin (a logged-in name on the list), by private message only:
+//     `!kick <listener>`, `!quiet`, `!unquiet`. Tried in the room, the admin
+//     is told privately how to send it.
 // And on a server where the bot is counted in votes, it backs a tempo vote
 // only when the humans alone have already carried it (DESIGN §4).
 

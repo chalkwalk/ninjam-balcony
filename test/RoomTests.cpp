@@ -143,10 +143,17 @@ TEST_CASE("Admin commands are taken from listed logged-in names only", "[room]")
   // and "balcony, quiet" from them is not a request to leave either.
   room.onChatMessage("MSG", "carol@1.2.3.x", "balcony, quiet");
   CHECK(why.empty());
+  CHECK(client.privately.empty());
+  // A listed admin's command in the room is not acted on; they are told,
+  // privately, to send it as a private message.
   room.onChatMessage("MSG", "carol", "balcony, quiet");
   CHECK(why.empty());
+  REQUIRE(client.privately.size() == 1);
+  CHECK(client.privately[0].find("private message") != std::string::npos);
+  client.privately.clear();
   room.onChatMessage("PRIVMSG", "carol", "!kick Pat");
   CHECK(why.empty());
+  CHECK(client.privately.empty());
   // A late arrival is told privately what is going on.
   room.onRoomMembershipChange("dave@1.2.3.x", true);
   REQUIRE(client.privately.size() == 1);

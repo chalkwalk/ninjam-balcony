@@ -43,7 +43,8 @@ build/balcony --server 127.0.0.1:22049 --url http://balcony.test/ --admins admin
   --vote-threshold 75 --listen 127.0.0.1:18080 --page web/
 build/balcony-fake-player 127.0.0.1 22049 bob --tone 550 --at 30 "!vote bpm 100"
 BALCONY_TEST_PASSWORD=testpw build/balcony-fake-player 127.0.0.1 22049 admin --login \
-  --at 20 "balcony, quiet" --at 23 "balcony, chat on" --at 26 "balcony, kick Pat" \
+  --at 20 "/msg balcony !quiet" --at 23 "/msg balcony !unquiet" \
+  --at 26 "/msg balcony !kick Pat" \
   --at 31 "!vote bpm 100"
 node test/browser/drive-live.mjs
 ```

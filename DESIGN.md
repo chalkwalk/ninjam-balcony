@@ -130,13 +130,13 @@ room's admins:
   cap on lines.
 - **Admin commands,** honoured only from logged-in users (names without the
   `@ip` that anonymous logins carry), from a configured list:
-  `balcony, kick <name>` drops that listener and blocks the name for the
-  session; `balcony, quiet` / `balcony, chat on` pause and resume all web chat.
-  **In words, not `!` commands** (found live, 2026-11-10): the stock server
-  answers any `!` line in the room other than `!vote` and `!topic` with
-  "Unknown !command" and never relays it, so `!kick` cannot reach the bot as
-  room chat. Sent as a private message to the bot, `!kick <name>`, `!quiet`
-  and `!unquiet` work as written.
+  `!kick <name>` drops that listener and blocks the name for the session;
+  `!quiet` / `!unquiet` pause and resume all web chat. **By private message to
+  the bot only** (owner, 2026-11-10): in the room the stock server answers any
+  `!` line other than `!vote` and `!topic` with "Unknown !command" and never
+  relays it, and the owner chose not to have word commands ("balcony, kick
+  ...") in open chat. An admin who tries one there is told privately how to
+  send it.
 - **Listen-only:** a setting that runs a jam with web chat off from the start;
   listening still works.
 
